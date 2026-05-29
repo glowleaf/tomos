@@ -1,0 +1,13 @@
+{
+  "name": "tomoswriting",
+  "version": "1.0.0",
+  "description": "EPUB production, GitHub backups, and writing tools for OpenCode",
+  "type": "module",
+  "main": "index.ts",
+  "files": ["index.ts", "skills/"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/glowleaf/tomos"
+  }
+}
