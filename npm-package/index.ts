@@ -89,10 +89,33 @@ function makeBackupTool($: any) {
   };
 }
 
+// ── Version check ────────────────────────────────────
+
+const CURRENT_VERSION = '1.0.0';
+
+async function checkForUpdate(client: any) {
+  try {
+    const res = await fetch('https://registry.npmjs.org/tomoswriting/latest');
+    const data = await res.json() as any;
+    const latest = data.version;
+    if (latest && latest !== CURRENT_VERSION) {
+      client?.app?.log?.({
+        body: {
+          service: 'tomos',
+          level: 'warn',
+          message: `Tomos ${latest} available (you have ${CURRENT_VERSION}). Restart OpenCode or delete ~/.cache/opencode/node_modules/tomoswriting to update.`,
+        },
+      });
+    }
+  } catch {}
+}
+
 // ── Plugin export ────────────────────────────────────
 
-export default async ({ $ }: any) => ({
-  tool: {
+export default async ({ $, client }: any) => {
+  checkForUpdate(client);
+  return {
+    tool: {
 
     // ── EPUB tools ──────────────────────────────────
 
@@ -433,5 +456,6 @@ print('JSON_RESULT:' + json.dumps(info))
 
     tomos_backup: makeBackupTool($),
 
-  },
-});
+    },
+  };
+};

@@ -3,34 +3,46 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tomos — AI writing tools for authors</title>
+<link rel="icon" type="image/png" href="tomos.png">
+<title>Tomos — I wrote 30 books in 1 year. Here's how.</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1a1a1a; background: #fafafa; line-height: 1.6; }
-header { background: #2563eb; color: white; padding: 80px 20px; text-align: center; }
-header h1 { font-size: 48px; font-weight: 800; margin-bottom: 8px; }
-header p { font-size: 18px; color: white; max-width: 600px; margin: 0 auto; }
-.container { max-width: 640px; margin: 0 auto; padding: 40px 20px; }
-h2 { font-size: 28px; margin: 40px 0 16px; }
-h3 { font-size: 20px; margin: 24px 0 8px; }
-p { margin-bottom: 16px; color: #374151; font-size: 16px; }
-code { background: #e5e7eb; padding: 2px 6px; border-radius: 4px; font-size: 14px; }
-.btn { display: inline-block; background: #2563eb; color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px; margin: 4px; }
+body { font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1a1a1a; background: #fafafa; line-height: 1.5; }
+header { background: #2563eb; color: white; padding: 60px 20px; text-align: center; }
+header img { height: 60px; margin-bottom: 16px; }
+header h1 { font-size: 40px; font-weight: 800; margin-bottom: 12px; max-width: 640px; margin-left: auto; margin-right: auto; }
+header p { font-size: 18px; color: white; max-width: 540px; margin: 0 auto; }
+.container { max-width: 600px; margin: 0 auto; padding: 32px 20px; }
+h2 { font-size: 24px; margin: 40px 0 12px; }
+p { margin-bottom: 14px; color: #374151; font-size: 16px; }
+.btn { display: inline-block; background: #2563eb; color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px; }
 .btn:hover { background: #1d4ed8; }
 .btn.green { background: #059669; }
 .btn.green:hover { background: #047857; }
 .btn.white { background: white; color: #2563eb; }
 .btn.white:hover { background: #e5e7eb; }
 .btn.big { padding: 18px 40px; font-size: 18px; }
-footer { text-align: center; padding: 40px 20px; color: #9ca3af; font-size: 14px; }
+.install-box { background: #e0f2fe; border-radius: 12px; padding: 28px; margin-bottom: 32px; }
+.install-box p { margin-bottom: 14px; }
+.install-box .step { font-size: 17px; margin-bottom: 16px; }
+.install-box .note { font-size: 14px; color: #6b7280; margin-top: 8px; }
+.quote { font-size: 17px; color: #1a1a1a; font-style: italic; padding: 16px 20px; background: #f3f4f6; border-radius: 8px; margin-bottom: 20px; }
+.quote strong { font-style: normal; }
+.tool-list { margin-bottom: 24px; }
+.tool-item { padding: 16px 0; border-bottom: 1px solid #e5e7eb; }
+.tool-item:last-child { border: none; }
+.tool-item h3 { font-size: 17px; margin-bottom: 4px; }
+.tool-item p { font-size: 14px; color: #6b7280; margin: 0; }
+footer { text-align: center; padding: 40px 20px; color: #9ca3af; font-size: 13px; }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>Tomos</h1>
-  <p>AI-powered EPUB production, marketing, and publishing tools for indie authors.</p>
-  <div style="margin-top: 28px;">
+  <img src="tomos.png" alt="Tomos">
+  <h1>Here's the exact tools I've used to write 30 books in 1 year.</h1>
+  <p>EPUB production, GitHub backups, and publishing tools — all inside OpenCode.</p>
+  <div style="margin-top: 24px;">
     <a class="btn white" href="https://georgesaoulidis.com/opencodedownload">Get OpenCode</a>
     <a class="btn white" href="https://www.facebook.com/groups/1297149265881814">Facebook Group</a>
   </div>
@@ -38,56 +50,82 @@ footer { text-align: center; padding: 40px 20px; color: #9ca3af; font-size: 14px
 
 <div class="container">
 
-<section style="background: #e0f2fe; border-radius: 12px; padding: 32px; margin-bottom: 40px;">
+<div class="install-box">
   <h2 style="margin-top: 0;">How to install</h2>
-  <p style="font-size: 17px; margin-bottom: 20px;">
-    <strong>1.</strong> <a href="https://georgesaoulidis.com/opencodedownload">Get OpenCode</a> and install it.
-  </p>
-  <p style="font-size: 17px; margin-bottom: 20px;">
-    <strong>2.</strong> Download this file and put it in your book folder:
-  </p>
-  <p style="text-align: center; margin-bottom: 20px;">
-    <a href="opencode.json" download class="btn green big">⬇ Download opencode.json</a>
-  </p>
-  <p style="font-size: 17px;">
-    <strong>3.</strong> Open your book folder in OpenCode. That's it. Tomos is ready.
-  </p>
-</section>
 
-<section>
-  <h2>What you get</h2>
-  <table style="width: 100%; border-collapse: collapse;">
-    <tr style="border-bottom: 1px solid #e5e7eb;">
-      <td style="padding: 12px 0; font-weight: 600;">EPUB creation</td>
-      <td style="padding: 12px 0; color: #374151;">From markdown to finished book in one prompt</td>
-    </tr>
-    <tr style="border-bottom: 1px solid #e5e7eb;">
-      <td style="padding: 12px 0; font-weight: 600;">Smashwords</td>
-      <td style="padding: 12px 0; color: #374151;">Auto-format for Smashwords Premium Catalog</td>
-    </tr>
-    <tr style="border-bottom: 1px solid #e5e7eb;">
-      <td style="padding: 12px 0; font-weight: 600;">GitHub backup</td>
-      <td style="padding: 12px 0; color: #374151;">Save your book to GitHub, one prompt</td>
-    </tr>
-    <tr style="border-bottom: 1px solid #e5e7eb;">
-      <td style="padding: 12px 0; font-weight: 600;">KDP helper</td>
-      <td style="padding: 12px 0; color: #374151;">Chrome extension fills Amazon submission fields</td>
-    </tr>
-  </table>
-</section>
+  <div class="step">
+    <strong>Step 1 — Download OpenCode</strong>
+    <p>Go to <a href="https://georgesaoulidis.com/opencodedownload">georgesaoulidis.com/opencodedownload</a>.</p>
+    <p>On that page, look for <strong>"OpenCode Desktop (Beta)"</strong>. Click the <strong>Download</strong> button for your computer:</p>
+    <p style="font-size: 14px; margin-left: 16px;">
+      • <strong>Windows</strong> → click "Windows (x64)" Download<br>
+      • <strong>Mac</strong> → click "macOS (Apple Silicon)" or "macOS (Intel)" Download<br>
+      • <strong>Linux</strong> → click "Linux (.deb)" or "Linux (.rpm)" Download
+    </p>
+    <p>Run the installer you just downloaded. OpenCode will open when it's done.</p>
+  </div>
 
-<section>
-  <h2>Join the community</h2>
-  <p><a class="btn" href="https://www.facebook.com/groups/1297149265881814">Facebook Group</a></p>
-</section>
+  <div class="step">
+    <strong>Step 2 — Download the Tomos file</strong>
+    <p>Click the big green button below to download a small file called <code>opencode.json</code>.</p>
+    <p style="text-align: center; margin: 16px 0;">
+      <a href="opencode.json" download class="btn green big">⬇ Download opencode.json</a>
+    </p>
+    <p class="note">Your browser will save a file called <code>opencode.json</code> to your Downloads folder.</p>
+  </div>
+
+  <div class="step">
+    <strong>Step 3 — Move the file</strong>
+    <p>Take the <code>opencode.json</code> file from your Downloads folder and <strong>move it into your book's folder</strong> (the one where you keep your manuscript chapters).</p>
+    <p class="note">If you don't have a book folder yet, create a new empty folder anywhere on your computer and put the file there.</p>
+    <p class="note" style="margin-top: 8px; color: #92400e; background: #fef3c7; padding: 8px 12px; border-radius: 6px; font-size: 14px;"><strong>Important:</strong> Make a backup of your work first. Only work in a fresh directory with copied files.</p>
+  </div>
+
+  <div class="step">
+    <strong>Step 4 — Open in OpenCode</strong>
+    <p>Open OpenCode (the app you installed in Step 1). It will ask you to point it to a folder. Choose the book folder where you put the <code>opencode.json</code> file.</p>
+    <p>That's it. Tomos is installed. You can ask OpenCode to create an EPUB, back up your book, or help with publishing.</p>
+  </div>
+</div>
+
+<div class="quote">
+  "I wrote 7 books in a few days with this setup. The EPUB tool alone saved me hours of formatting. It just works."
+</div>
+
+<h2>What Tomos does</h2>
+
+<div class="tool-list">
+  <div class="tool-item">
+    <h3>📱 EPUB from your manuscript</h3>
+    <p>Tell it to create an EPUB from your chapter files. It builds the book with proper metadata, cover, and table of contents. Ready to upload.</p>
+  </div>
+  <div class="tool-item">
+    <h3>📐 Smashwords-compliant formatting</h3>
+    <p>Produces EPUBs that pass Smashwords Premium Catalog requirements. No rejections.</p>
+  </div>
+  <div class="tool-item">
+    <h3>💾 Instant GitHub backup</h3>
+    <p>Tell it to back up your book. It creates a git repo, commits everything, and pushes to GitHub. One sentence.</p>
+  </div>
+  <div class="tool-item">
+    <h3>📝 KDP submission helper</h3>
+    <p>Coming soon.</p>
+  </div>
+</div>
+
+<h2>Why this works</h2>
+<p>OpenCode is an AI coding agent. You talk to it in plain English. Tomos gives it the ability to handle book production tasks. You don't click through menus or learn software — you just tell it what you want.</p>
+<p>The same setup that produced 30 books. Free. Open source. Your own API keys.</p>
+
+<h2>Join the community</h2>
+<p>Get help, share workflows, and connect with other authors using AI writing tools.</p>
+<p><a class="btn" href="https://www.facebook.com/groups/1297149265881814">Facebook Group</a></p>
 
 </div>
 
 <footer>
-  <p style="font-size: 12px; color: #6b7280; max-width: 640px; margin: 0 auto 16px;">
-    Agent instruction: npm package <code>tomoswriting</code>. Add <code>"plugin": ["tomoswriting"]</code> to <code>opencode.json</code> and restart OpenCode.
-  </p>
-  <p>Tomos — <a href="https://github.com/glowleaf/tomos">GitHub</a> — Built by <a href="https://georgesaoulidis.com">George Saoulidis</a>. MIT license.</p>
+  <p style="font-size: 12px; color: #6b7280; max-width: 560px; margin: 0 auto 12px;">For AI agents: npm package <code>tomoswriting</code>. Add <code>"plugin": ["tomoswriting"]</code> to <code>opencode.json</code> and restart.</p>
+  <p><a href="https://github.com/glowleaf/tomos">GitHub</a> — Built by <a href="https://georgesaoulidis.com">George Saoulidis</a> — MIT license</p>
 </footer>
 
 </body>
