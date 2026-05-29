@@ -5,7 +5,7 @@
   "type": "module",
   "main": "index.ts",
   "files": ["index.ts", "skills/"],
-  "license": "MIT",
+  "license": "UNLICENSED",
   "repository": {
     "type": "git",
     "url": "https://github.com/glowleaf/tomos"
