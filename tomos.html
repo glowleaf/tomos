@@ -228,8 +228,11 @@ function renderHistory(period){
   }else{
     aggregated=days;
   }
-  var entries=period==='30'?(hasMonthly?aggregated.slice(-1):aggregated.slice(-30)):aggregated;
   var is30=period==='30';
+  var allDates=days.map(d=>d.date).filter(d=>d).sort();
+  var latestDate=allDates[allDates.length-1];
+  var cutoffDate=is30&&latestDate?getCutoff(latestDate):'';
+  var entries=cutoffDate?aggregated.filter(d=>d.date>=cutoffDate):aggregated;
   var withSales=entries.filter(d=>d.royalties>0);
   var today=withSales.length?withSales[withSales.length-1]:null;
   var yest=withSales.length>1?withSales[withSales.length-2]:null;
@@ -433,7 +436,11 @@ function renderToday(){
   var withSales=use.filter(d=>d.royalties>0);
   var today=withSales.length?withSales[withSales.length-1]:null;
   var yest=withSales.length>1?withSales[withSales.length-2]:null;
-  var viewEntries=hasMonthly?use.slice(-1):use.slice(-30);
+  // Last 30 calendar days: find cutoff from all entries (daily or monthly)
+  var allDates=days.map(d=>d.date).filter(d=>d).sort();
+  var latestDate=allDates[allDates.length-1];
+  var cutoffDate=latestDate?getCutoff(latestDate):'';
+  var viewEntries=cutoffDate?use.filter(d=>d.date>=cutoffDate):use;
   var lR=viewEntries.reduce((s,d)=>s+(d.royalties||0),0),lU=viewEntries.reduce((s,d)=>s+(d.units||0),0),lP=viewEntries.reduce((s,d)=>s+(d.pageReads||0),0);
   var allR=use.reduce((s,d)=>s+(d.royalties||0),0),allU=use.reduce((s,d)=>s+(d.units||0),0),allP=use.reduce((s,d)=>s+(d.pageReads||0),0);
   document.getElementById('todayAmount').textContent=today?'$'+today.royalties.toFixed(2):'$0.00';
@@ -557,6 +564,17 @@ function fmt(n){if(n==null||isNaN(n))return'0';if(n>=1000000)return(n/1000000).t
 function fmtD(d){if(!d)return'';try{return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}catch{return d}}
 function esc(s){if(!s)return'';var d=document.createElement('div');d.textContent=s;return d.innerHTML}
 function n(m){var e=document.getElementById('notif');e.textContent=m;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),2500)}
+function getCutoff(latest){
+  // For daily dates (len>7): subtract 30 days, return YYYY-MM-DD
+  // For monthly dates (len<=7): return YYYY-MM for month containing latest-30days
+  if(latest.length<=7){
+    // Monthly date: return the month that starts 30 days before month start
+    var d=new Date(latest+'-01');d.setDate(d.getDate()-30);
+    return d.toISOString().slice(0,7);
+  }
+  var d=new Date(latest);d.setDate(d.getDate()-30);
+  return d.toISOString().slice(0,10);
+}
 </script>
 </body>
 </html>
