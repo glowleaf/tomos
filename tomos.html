@@ -335,14 +335,22 @@ async function importXLSX(file){
       var h=cs[0],di=h.findIndex(x=>/date|royalty/i.test(x)),ti=h.findIndex(x=>/title/i.test(x));
       var ai=h.findIndex(x=>/asin|isbn/i.test(x)),ui=h.findIndex(x=>/^net units|net sold/i.test(x));
       var ri=h.findIndex(x=>/^royalty$/i.test(x));
-      // Get date 30 days ago
       var dates=cs.slice(1).map(row=>String(row[di]||'').slice(0,10)).filter(d=>d).sort();
-      var cutoff=new Date(dates[dates.length-1]);cutoff.setDate(cutoff.getDate()-30);
-      var cutoffStr=cutoff.toISOString().slice(0,10);
+      var isMonthly=dates.length>0&&dates[0].length<=7;
+      var cutoffStr;
+      if(isMonthly){
+        // Monthly data: "30 days" = latest month
+        var latestMonth=dates[dates.length-1];
+        cutoffStr=latestMonth.slice(0,7); // YYYY-MM format
+      }else{
+        var cutoff=new Date(dates[dates.length-1]);cutoff.setDate(cutoff.getDate()-30);
+        cutoffStr=cutoff.toISOString().slice(0,10);
+      }
       var top30={};
       for(var i=1;i<cs.length;i++){
         var row=cs[i],d=di>=0?String(row[di]||'').slice(0,10):'';
-        if(d>=cutoffStr){
+        var match=isMonthly?(d.slice(0,7)===cutoffStr):(d>=cutoffStr);
+        if(match){
           var asin=ai>=0?String(row[ai]||''):'',title=ti>=0?String(row[ti]||'Unknown'):'Unknown';
           var units=parseFloat(row[ui])||0,royalty=parseFloat(row[ri])||0;
           if(asin&&(royalty||units)){
@@ -418,8 +426,8 @@ function renderToday(){
     '<div class="stat"><div class="stat-lbl">Avg/Unit</div><div class="stat-val">$'+(lU>0?(lR/lU).toFixed(2):'0.00')+'</div><div class="stat-sub">per sale</div></div>'+
     '<div class="stat"><div class="stat-lbl">All Time</div><div class="stat-val">$'+allR.toFixed(2)+'</div><div class="stat-sub">'+fmt(allU)+' units ~ '+fmt(allP)+' KENP</div></div>';
   
-  // Top books: use lifetime for monthly view, 30-day for daily view
-  var topBooks=hasMonthly?[...books].sort((a,b)=>(b.royalties||0)-(a.royalties||0)):(raw.top30Books&&raw.top30Books.length?raw.top30Books:[...books].sort((a,b)=>(b.royalties||0)-(a.royalties||0)));
+  // Top books: use 30-day calculated data if available
+  var topBooks=raw.top30Books&&raw.top30Books.length?raw.top30Books:[...books].sort((a,b)=>(b.royalties||0)-(a.royalties||0));
   document.getElementById('topBooks').innerHTML=topBooks.length?topBooks.slice(0,20).map((b,i)=>bookHTML(b,i+1)).join(''):'<div class="empty-state">Import KDP reports to start</div>';
   
   // Pie chart: top 5 books + Other (use 30-day data)
