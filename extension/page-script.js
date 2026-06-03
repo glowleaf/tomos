@@ -5,6 +5,32 @@
     window.postMessage({ source: 'tomos-page-script', type, data, url }, '*');
   }
 
+  // Wait for the injected parser to be available
+  function waitForParser() {
+    return new Promise(function(resolve) {
+      function check() {
+        if (typeof KDPXLSXParser !== 'undefined') resolve();
+        else setTimeout(check, 5);
+      }
+      check();
+    });
+  }
+
+  // Handle XLSX binary data: parse inline and send structured data back
+  async function processXLSX(buffer, url) {
+    try {
+      await waitForParser();
+      const parser = new KDPXLSXParser();
+      const result = await parser.parse(buffer);
+      const appData = parser.toAppData(result);
+      if (appData && (appData.books || appData.dailyHistory)) {
+        send('xlsx-parsed', appData, url);
+      }
+    } catch(e) {
+      console.error('[Tomos] Parse error:', e);
+    }
+  }
+
   function tryParseJSON(text) {
     try { return JSON.parse(text); } catch { return null; }
   }
@@ -17,12 +43,17 @@
   }
 
   function sendIfSales(json, url) {
-    if (json && looksLikeSales(json)) {
-      send('sales-data', json, url);
-    }
+    if (json && looksLikeSales(json)) send('sales-data', json, url);
   }
 
-  // Override fetch
+  function arrayBufferToBase64(buffer) {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    return btoa(binary);
+  }
+
+  // Override fetch - captures XLSX AND JSON
   const origFetch = window.fetch;
   window.fetch = function(input, init) {
     const url = typeof input === 'string' ? input : (input instanceof Request ? input.url : '');
@@ -31,6 +62,10 @@
       if (ct.includes('json')) {
         resp.clone().text().then(function(text) {
           if (text && text.length < 500000) sendIfSales(tryParseJSON(text), url);
+        }).catch(function() {});
+      } else if (ct.includes('vnd.openxmlformats') || ct.includes('octet-stream') || url.includes('.xlsx')) {
+        resp.clone().arrayBuffer().then(function(buf) {
+          if (buf.byteLength > 100) processXLSX(buf, url);
         }).catch(function() {});
       }
       return resp;
@@ -58,6 +93,14 @@
               const text = xhr.responseText;
               if (text && text.length < 500000) sendIfSales(tryParseJSON(text), url);
             } catch(e) {}
+          } else if (ct.includes('vnd.openxmlformats') || ct.includes('octet-stream') || url.includes('.xlsx')) {
+            const data = xhr.response;
+            if (data instanceof ArrayBuffer && data.byteLength > 100) processXLSX(data, url);
+            else if (data instanceof Blob && data.size > 100) {
+              const r = new FileReader();
+              r.onload = function() { processXLSX(r.result, url); };
+              r.readAsArrayBuffer(data);
+            }
           }
         }
         if (origRSC) origRSC.apply(xhr, arguments);
