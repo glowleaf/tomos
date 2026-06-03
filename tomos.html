@@ -260,7 +260,7 @@ function renderHistory(period){
     '<div class="stat"><div class="stat-lbl">'+(is30?'Today':'Latest')+'</div><div class="stat-val">'+(today?'$'+today.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(today?today.units+' units':'')+'</div></div>'+
     '<div class="stat"><div class="stat-lbl">'+(is30?'Yesterday':'Previous')+'</div><div class="stat-val">'+(yest?'$'+yest.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(yest?yest.units+' units':'')+'</div></div>'+
     '<div class="stat"><div class="stat-lbl">'+(is30?'Last 30 Days':'Lifetime')+'</div><div class="stat-val">$'+lR.toFixed(2)+'</div><div class="stat-sub">'+fmt(lU)+' units ~ '+fmt(lP)+' KENP ('+kenp$(lP)+')</div></div>'+
-    '<div class="stat"><div class="stat-lbl">KU Pages</div><div class="stat-val">'+fmt(lP)+'</div><div class="stat-sub"></div></div>'+
+    '<div class="stat"><div class="stat-lbl">KU Pages</div><div class="stat-val">'+fmt(lP)+'</div><div class="stat-sub">'+kenp$(lP)+'</div></div>'+
     '<div class="stat"><div class="stat-lbl">Avg/Unit</div><div class="stat-val">$'+(lU>0?(lR/lU).toFixed(2):'0.00')+'</div><div class="stat-sub">per sale</div></div>'+
     '<div class="stat"><div class="stat-lbl">Entries</div><div class="stat-val">'+entries.length+'</div><div class="stat-sub">'+(is30?'days':'months/days')+'</div></div>';
   // Books for period
