@@ -234,8 +234,9 @@ function renderHistory(period){
   var today=withSales.length?withSales[withSales.length-1]:null;
   var yest=withSales.length>1?withSales[withSales.length-2]:null;
   var lR=entries.reduce((s,d)=>s+(d.royalties||0),0),lU=entries.reduce((s,d)=>s+(d.units||0),0),lP=entries.reduce((s,d)=>s+(d.pageReads||0),0);
+  var lbl=is30?(hasMonthly?'30 Months':'30 Days'):'Lifetime';
   document.getElementById('histAmount').textContent='$'+lR.toFixed(2);
-  document.getElementById('histLabel').textContent=is30?'earned in last 30 days':'earned across all time';
+  document.getElementById('histLabel').textContent=lbl;
   document.getElementById('histCount').textContent=books.length;
   document.getElementById('histStats').innerHTML=
     '<div class="stat"><div class="stat-lbl">'+(is30?'Today':'Latest')+'</div><div class="stat-val">'+(today?'$'+today.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(today?today.units+' units':'')+'</div></div>'+
