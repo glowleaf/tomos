@@ -7,7 +7,7 @@
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.mini.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;color:#333;background:#fff;min-height:100vh}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;color:#1a202c;background:#fff;min-height:100vh}
 .container{max-width:1100px;margin:0 auto;padding:20px}
 /* Logo */
 .logo-wrap{text-align:center;padding:20px 0}
@@ -29,9 +29,9 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:15px 0}
 /* Stats row */
 .stats-row{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:20px}
 .stat-card{flex:1;min-width:150px;background:#f7fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px}
-.stat-label{font-size:11px;text-transform:uppercase;color:#a0aec0;letter-spacing:.5px}
+.stat-label{font-size:11px;text-transform:uppercase;color:#718096;letter-spacing:.5px}
 .stat-value{font-size:22px;font-weight:700;color:#1a202c;margin-top:2px}
-.stat-sub{font-size:12px;color:#a0aec0;margin-top:2px}
+.stat-sub{font-size:12px;color:#718096;margin-top:2px}
 /* Section header */
 .sectionHeader{display:flex;justify-content:space-between;align-items:center;margin:15px 0}
 .sectionHeader h3{font-size:16px;font-weight:600;color:#1a202c}
@@ -43,14 +43,14 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:15px 0}
 .book-rank{width:24px;height:24px;border-radius:50%;background:#ebf4ff;color:#4299e1;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-right:10px}
 .book-info{flex:1;min-width:0}
 .book-title{font-size:13px;font-weight:600;color:#1a202c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.book-meta{font-size:11px;color:#a0aec0;margin-top:1px}
+.book-meta{font-size:11px;color:#718096;margin-top:1px}
 .book-stats{text-align:right;flex-shrink:0;margin-left:12px}
 .book-earnings{font-size:15px;font-weight:700;color:#1a202c}
-.book-units{font-size:11px;color:#a0aec0}
+.book-units{font-size:11px;color:#718096}
 /* Table */
 .table-wrap{overflow-x:auto;border:1px solid #e2e8f0;border-radius:8px}
 table{width:100%;border-collapse:collapse;font-size:13px}
-th{text-align:left;padding:10px 14px;font-size:10px;text-transform:uppercase;color:#a0aec0;background:#f7fafc;border-bottom:1px solid #e2e8f0;font-weight:600;letter-spacing:.5px}
+th{text-align:left;padding:10px 14px;font-size:10px;text-transform:uppercase;color:#718096;background:#f7fafc;border-bottom:1px solid #e2e8f0;font-weight:600;letter-spacing:.5px}
 td{padding:10px 14px;border-bottom:1px solid #edf2f7;color:#4a5568}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:#f7fafc}
@@ -60,9 +60,9 @@ tr:hover td{background:#f7fafc}
 /* Drop zone */
 .drop-zone{border:2px dashed #cbd5e0;border-radius:8px;padding:30px;text-align:center;cursor:pointer;transition:.15s;background:#f7fafc;margin-top:12px}
 .drop-zone:hover,.drop-zone.dragover{border-color:#4299e1;background:#ebf4ff}
-.dz-icon{font-size:30px;color:#a0aec0;margin-bottom:6px}
+.dz-icon{font-size:30px;color:#718096;margin-bottom:6px}
 .dz-text{font-size:14px;color:#4a5568;font-weight:500}
-.dz-sub{font-size:12px;color:#a0aec0;margin-top:2px}
+.dz-sub{font-size:12px;color:#718096;margin-top:2px}
 .file-input{display:none}
 /* Buttons */
 .btn{display:inline-block;padding:8px 18px;border-radius:6px;border:1px solid #e2e8f0;background:#fff;color:#4a5568;font-size:12px;font-weight:500;cursor:pointer;transition:.15s;text-decoration:none}
@@ -92,10 +92,10 @@ tr:hover td{background:#f7fafc}
 .series-list{display:grid;gap:6px}
 .series-item{display:flex;justify-content:space-between;align-items:center;padding:14px;border:1px solid #e2e8f0;border-radius:8px}
 .series-name{font-weight:600;font-size:14px}
-.series-meta{font-size:12px;color:#a0aec0;margin-top:2px}
+.series-meta{font-size:12px;color:#718096;margin-top:2px}
 .series-earnings{font-weight:700;font-size:16px;color:#1a202c}
 /* Empty state */
-.empty-state{text-align:center;padding:40px 20px;color:#a0aec0;font-size:13px;line-height:1.6}
+.empty-state{text-align:center;padding:40px 20px;color:#718096;font-size:13px;line-height:1.6}
 </style>
 </head>
 <body>
@@ -330,9 +330,9 @@ function renderChart(canvas,data,color){
   canvas.width=rect.width*dpr;canvas.height=rect.height*dpr;canvas.style.width=rect.width+'px';canvas.style.height=rect.height+'px';
   ctx.scale(dpr,dpr);ctx.clearRect(0,0,rect.width,rect.height);
   var sorted=[...data].sort((a,b)=>(a.date||'').localeCompare(b.date||'')),w=rect.width,h=rect.height,pad={t:15,b:25,l:55,r:15},cw=w-pad.l-pad.r,ch=h-pad.t-pad.b;
-  if(sorted.length<2){ctx.fillStyle='#a0aec0';ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText('Not enough data',w/2,h/2);return}
+  if(sorted.length<2){ctx.fillStyle='#718096';ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText('Not enough data',w/2,h/2);return}
   var vals=sorted.map(d=>d.royalties||0),max=Math.max(...vals,1)*1.1;
-  ctx.fillStyle='#a0aec0';ctx.font='10px sans-serif';ctx.textAlign='right';
+  ctx.fillStyle='#718096';ctx.font='10px sans-serif';ctx.textAlign='right';
   for(var i=0;i<=4;i++){var v=(max*i)/4,y=pad.t+ch-(ch*i)/4;ctx.fillText('$'+v.toFixed(2),pad.l-6,y+3);ctx.strokeStyle='#edf2f7';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke()}
   var gap=cw/(sorted.length-1);ctx.strokeStyle=color;ctx.lineWidth=2;ctx.beginPath();
   sorted.forEach((d,i)=>{var x=pad.l+gap*i,y=pad.t+ch-(vals[i]/max)*ch;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y)});
@@ -340,7 +340,7 @@ function renderChart(canvas,data,color){
   ctx.lineTo(pad.l+gap*(sorted.length-1),pad.t+ch);ctx.lineTo(pad.l,pad.t+ch);ctx.closePath();
   ctx.fillStyle=color.replace('#','rgba(')+',0.1)'.replace('rgba(4','rgba(4');try{ctx.fill()}catch(e){}
   sorted.forEach((d,i)=>{var x=pad.l+gap*i,y=pad.t+ch-(vals[i]/max)*ch;ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,3,0,2*Math.PI);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x,y,1.5,0,2*Math.PI);ctx.fill()});
-  ctx.fillStyle='#a0aec0';ctx.font='10px sans-serif';ctx.textAlign='center';
+  ctx.fillStyle='#718096';ctx.font='10px sans-serif';ctx.textAlign='center';
   sorted.forEach((d,i)=>{ctx.fillText((()=>{try{return new Date(d.date).toLocaleDateString('en-US',{month:'short',day:'numeric'})}catch{return d.date||''}})(),pad.l+gap*i,pad.t+ch+16)});
 }
 
