@@ -498,7 +498,7 @@ function renderPieCustom(canvas,data){
   var ctx=canvas.getContext('2d'),rect=canvas.parentElement.getBoundingClientRect();
   if(rect.width<10||rect.height<10)return;
   var dpr=window.devicePixelRatio||1;
-  c.width=rect.width*dpr;c.height=rect.height*dpr;c.style.width=rect.width+'px';c.style.height=rect.height+'px';
+  canvas.width=rect.width*dpr;canvas.height=rect.height*dpr;canvas.style.width=rect.width+'px';canvas.style.height=rect.height+'px';
   ctx.scale(dpr,dpr);ctx.clearRect(0,0,rect.width,rect.height);
   var cx=rect.width/2,cy=rect.height/2-10,r=Math.min(cx,cy)-20,total=data.reduce((s,d)=>s+d.value,0);
   if(!total)return;
