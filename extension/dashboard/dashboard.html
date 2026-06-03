@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Report</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div id="app">
+    <nav class="topbar">
+      <div class="topbar-left">
+        <h1 class="logo">Tomos Book Sales</h1>
+          <span class="logo-badge">v1.0</span>
+      </div>
+      <div class="topbar-center">
+        <div class="date-nav">
+          <button class="date-btn" id="prevDay">‹</button>
+          <span id="dateDisplay" class="date-display">Today</span>
+          <button class="date-btn" id="nextDay">›</button>
+          <select id="viewMode" class="view-select">
+            <option value="daily">Daily</option>
+            <option value="monthly">Monthly</option>
+            <option value="range">Range</option>
+          </select>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button id="refreshBtn" class="topbar-btn" title="Refresh">↻</button>
+        <button id="exportBtn" class="topbar-btn" title="Export">↓</button>
+        <span id="lastSync" class="last-sync">—</span>
+      </div>
+    </nav>
+
+    <div class="tabs-bar">
+      <button class="tab active" data-tab="today">Today</button>
+      <button class="tab" data-tab="historical">Historical</button>
+      <button class="tab" data-tab="series">Series</button>
+      <button class="tab" data-tab="books">Books</button>
+      <button class="tab" data-tab="settings">Settings</button>
+    </div>
+
+    <div id="tab-today" class="tab-pane active">
+      <div class="today-hero">
+        <div class="today-amount" id="todayAmount">$0.00</div>
+        <div class="today-label">earned <span id="todayDate">today</span></div>
+        <div class="today-books">from <strong id="todayBookCount">0</strong> books.</div>
+        <div class="today-extra" id="todayExtra"></div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">This Month</div>
+          <div class="stat-value" id="monthEarnings">$0.00</div>
+          <div class="stat-sub" id="monthUnits">0 units</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Last 30 Days</div>
+          <div class="stat-value" id="last30Earnings">$0.00</div>
+          <div class="stat-sub" id="last30Units">0 units</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">KU Page Reads</div>
+          <div class="stat-value" id="totalPageReads">0</div>
+          <div class="stat-sub" id="totalBorrows">0 borrows</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Avg Royalty/Unit</div>
+          <div class="stat-value" id="avgRoyalty">$0.00</div>
+          <div class="stat-sub" id="avgUnitInfo">per sale</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <h3>Today's Top Books</h3>
+        </div>
+        <div id="topBooks" class="book-list"></div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <h3>7-Day Royalty Trend</h3>
+        </div>
+        <div class="chart-box">
+          <canvas id="trendChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-historical" class="tab-pane">
+      <div class="section">
+        <div class="section-header">
+          <h3>Date Range</h3>
+          <div class="range-controls">
+            <input type="date" id="histFrom" class="date-input">
+            <span class="range-sep">to</span>
+            <input type="date" id="histTo" class="date-input">
+            <button id="applyRange" class="btn btn-sm">Apply</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Period Earnings</div>
+          <div class="stat-value" id="periodEarnings">$0.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Period Units</div>
+          <div class="stat-value" id="periodUnits">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Page Reads</div>
+          <div class="stat-value" id="periodPageReads">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Avg Daily</div>
+          <div class="stat-value" id="periodAvgDaily">$0.00</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <h3>Daily Breakdown</h3>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="historyTable">
+            <thead>
+              <tr><th>Date</th><th>Royalties</th><th>Units</th><th>Page Reads</th><th>Avg/Unit</th></tr>
+            </thead>
+            <tbody id="historyBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <h3>Trend</h3>
+        </div>
+        <div class="chart-box">
+          <canvas id="historicalChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-series" class="tab-pane">
+      <div class="section">
+        <div class="section-header">
+          <h3>Series Performance</h3>
+        </div>
+        <div id="seriesList" class="series-list">
+          <div class="empty-state">Series data is inferred from your book catalog. As data accumulates, series will appear here.</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-books" class="tab-pane">
+      <div class="section">
+        <div class="section-header">
+          <h3>All Books</h3>
+          <span class="badge" id="allBooksCount">0</span>
+        </div>
+        <div class="search-bar">
+          <input type="text" id="bookSearch" class="search-input" placeholder="Search books...">
+          <select id="bookSort" class="sort-select">
+            <option value="earnings">Sort by Earnings</option>
+            <option value="units">Sort by Units</option>
+            <option value="title">Sort by Title</option>
+          </select>
+        </div>
+        <div id="allBooks" class="book-list"></div>
+      </div>
+    </div>
+
+    <div id="tab-settings" class="tab-pane">
+      <div class="settings-grid">
+        <div class="settings-card">
+          <h3>How It Works</h3>
+          <p>Download your reports from <a href="https://kdpreports.amazon.com/dashboard" target="_blank" class="link">KDP Reports Dashboard</a> (click "Download Report"), then drag and drop the XLSX files here.</p>
+          <p>All data is stored locally in your browser. Nothing is sent to any external server.</p>
+        </div>
+        <div class="settings-card">
+          <h3>Import Reports</h3>
+          <div id="dropZone" class="drop-zone">
+            <div class="drop-zone-icon">↓</div>
+            <div class="drop-zone-text">Drop KDP XLSX files here</div>
+            <div class="drop-zone-sub">or click to select files</div>
+            <input type="file" class="file-input" accept=".xlsx,.json" multiple>
+          </div>
+          <div class="source-list" style="margin-top: 12px;">
+            <div class="source-item active"><span class="source-icon">●</span><span>KDP Dashboard Report (.xlsx)</span></div>
+            <div class="source-item active"><span class="source-icon">●</span><span>KDP Orders Report (.xlsx)</span></div>
+            <div class="source-item active"><span class="source-icon">●</span><span>Book Report JSON (.json) — export/import</span></div>
+          </div>
+        </div>
+        <div class="settings-card">
+          <h3>Data Management</h3>
+          <div class="settings-actions">
+            <button id="exportDataBtn" class="btn">Export Data (JSON)</button>
+            <button id="clearDataBtn" class="btn btn-danger">Clear All Data</button>
+          </div>
+        </div>
+        <div class="settings-card">
+          <h3>Storage Stats</h3>
+          <div class="stat-line"><span>Last Updated:</span> <strong id="sLastUpdated">Never</strong></div>
+          <div class="stat-line"><span>Days of Data:</span> <strong id="sDataDays">0</strong></div>
+          <div class="stat-line"><span>Books Tracked:</span> <strong id="sTrackedBooks">0</strong></div>
+          <div class="stat-line"><span>Total Royalties (captured):</span> <strong id="sTotalRoyalties">$0.00</strong></div>
+        </div>
+        <div class="settings-card">
+          <h3>Debug: API Monitor</h3>
+          <p>Open the KDP Reports page and check the browser console to see what API calls are being intercepted.</p>
+          <button id="copyDebugInfo" class="btn">Copy Debug Info</button>
+          <pre id="debugOutput" class="debug-output"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="notification" class="notification"></div>
+  <script src="dashboard.js"></script>
+</body>
+</html>
