@@ -259,7 +259,7 @@ export class KDPXLSXParser {
     return appData;
   }
 
-  // ZIP reader
+  // ZIP reader - sync for stored, async for deflated entries
   async readZip(buffer) {
     const u8 = new Uint8Array(buffer);
     const files = {};
@@ -267,8 +267,7 @@ export class KDPXLSXParser {
     const eocd = this.findEOCD(u8);
     const cdOffset = this.readU32(u8, eocd + 16);
     const cdEntries = this.readU16(u8, eocd + 10);
-    const cdSize = this.readU32(u8, eocd + 12);
-    const cdEnd = cdOffset + cdSize;
+    const cdEnd = cdOffset + this.readU32(u8, eocd + 12);
 
     let pos = cdOffset;
     for (let i = 0; i < cdEntries && pos < cdEnd; i++) {
@@ -280,71 +279,60 @@ export class KDPXLSXParser {
       const compMethod = this.readU16(u8, pos + 10);
       const compSize = this.readU32(u8, pos + 20);
       const uncompSize = this.readU32(u8, pos + 24);
-
       const fileNameBytes = u8.slice(pos + 46, pos + 46 + fileNameLen);
       const fileName = new TextDecoder().decode(fileNameBytes).replace(/\\/g, '/');
 
       if (fileName.includes('/') && !fileName.endsWith('/')) {
-        const fileData = this.readLocalFile(u8, localOffset, compMethod, compSize, uncompSize);
-        if (fileData) {
-          files[fileName] = fileData;
-        }
+        const data = await this.readLocalFileData(u8, localOffset, compMethod, compSize, uncompSize);
+        if (data) files[fileName] = data;
       }
-
       pos += 46 + fileNameLen + extraLen + commentLen;
     }
-
     return files;
   }
 
   findEOCD(u8) {
-    const sig = 0x06054b50;
-    const view = new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
     for (let i = u8.length - 22; i >= 0; i--) {
-      if (view.getUint32(i, true) === sig) return i;
+      if (this.readU32(u8, i) === 0x06054b50) return i;
     }
     throw new Error('EOCD not found');
   }
 
-  readLocalFile(u8, offset, method, compSize, uncompSize) {
+  async readLocalFileData(u8, offset, method, compSize, uncompSize) {
     if (this.readU32(u8, offset) !== 0x04034b50) return null;
     const fileNameLen = this.readU16(u8, offset + 26);
     const extraLen = this.readU16(u8, offset + 28);
     const dataStart = offset + 30 + fileNameLen + extraLen;
-
-    if (method === 0) {
-      return u8.slice(dataStart, dataStart + uncompSize);
-    } else if (method === 8) {
-      return this.inflate(u8.slice(dataStart, dataStart + compSize), uncompSize);
-    }
+    const compressed = u8.slice(dataStart, dataStart + (method === 0 ? uncompSize : compSize));
+    if (method === 0) return compressed;
+    if (method === 8) return await this.inflate(compressed);
     return null;
   }
 
-  async inflate(data, uncompSize) {
-    try {
-      const cs = new DecompressionStream('deflate-raw');
-      const writer = cs.writable.getWriter();
-      writer.write(data);
-      writer.close();
-      const reader = cs.readable.getReader();
-      const chunks = [];
-      let total = 0;
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        chunks.push(value);
-        total += value.length;
+  async inflate(data) {
+    if (typeof DecompressionStream !== 'undefined') {
+      try {
+        const cs = new DecompressionStream('deflate-raw');
+        const writer = cs.writable.getWriter();
+        await writer.write(data);
+        await writer.close();
+        const reader = cs.readable.getReader();
+        const chunks = [];
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          chunks.push(value);
+        }
+        const total = chunks.reduce((s, c) => s + c.length, 0);
+        const result = new Uint8Array(total);
+        let pos = 0;
+        for (const c of chunks) { result.set(c, pos); pos += c.length; }
+        return result;
+      } catch (e) {
+        return null;
       }
-      const result = new Uint8Array(total);
-      let pos = 0;
-      for (const chunk of chunks) {
-        result.set(chunk, pos);
-        pos += chunk.length;
-      }
-      return result;
-    } catch (e) {
-      return null;
     }
+    return null;
   }
 
   parseWorkbook(xmlData) {
