@@ -217,18 +217,27 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(raw))}catch(e){}}
 function load(){try{var r=localStorage.getItem(KEY);if(r){var p=JSON.parse(r);raw=p;books=p.books||[];days=p.dailyHistory||[];renderToday()}}catch(e){}}
 
 function renderToday(){
-  var withSales=days.filter(d=>d.royalties>0);
+  var mc=days.filter(d=>d.date&&d.date.length<=7).length;
+  var dc=days.filter(d=>d.date&&d.date.length>7).length;
+  var isMonthly=mc>dc;
+  var primary=days.filter(d=>!d.date||(isMonthly?d.date.length<=7:d.date.length>7));
+  var withSales=primary.filter(d=>d.royalties>0);
   var today=withSales.length?withSales[withSales.length-1]:null;
   var yest=withSales.length>1?withSales[withSales.length-2]:null;
+  // Last 30 days = last 30 daily entries or last 1 month (monthly)
+  var viewN=isMonthly?1:30;
+  var lastN=primary.slice(-viewN);
+  var lR=lastN.reduce((s,d)=>s+(d.royalties||0),0),lU=lastN.reduce((s,d)=>s+(d.units||0),0),lP=lastN.reduce((s,d)=>s+(d.pageReads||0),0);
+  var allR=primary.reduce((s,d)=>s+(d.royalties||0),0),allU=primary.reduce((s,d)=>s+(d.units||0),0),allP=primary.reduce((s,d)=>s+(d.pageReads||0),0);
   var last30=days.slice(-30);
   var lR=last30.reduce((s,d)=>s+(d.royalties||0),0),lU=last30.reduce((s,d)=>s+(d.units||0),0),lP=last30.reduce((s,d)=>s+(d.pageReads||0),0);
   var allR=days.reduce((s,d)=>s+(d.royalties||0),0),allU=days.reduce((s,d)=>s+(d.units||0),0),allP=days.reduce((s,d)=>s+(d.pageReads||0),0);
   document.getElementById('todayAmount').textContent=today?'$'+today.royalties.toFixed(2):'$0.00';
-  document.getElementById('todayLabel').textContent=today?'earned on '+fmtD(today.date):'earned today';
+  document.getElementById('todayLabel').textContent=today?(isMonthly?'earned in '+today.date:'earned on '+fmtD(today.date)):'earned today';
   document.getElementById('todayCount').textContent=books.length;
   document.getElementById('stats').innerHTML=
-    '<div class="stat"><div class="stat-lbl">Today</div><div class="stat-val">'+(today?'$'+today.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(today?today.units+' units':'')+'</div></div>'+
-    '<div class="stat"><div class="stat-lbl">Yesterday</div><div class="stat-val">'+(yest?'$'+yest.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(yest?yest.units+' units':'')+'</div></div>'+
+    '<div class="stat"><div class="stat-lbl">'+(isMonthly?'Latest Month':'Today')+'</div><div class="stat-val">'+(today?'$'+today.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(today?today.units+' units':'')+'</div></div>'+
+    '<div class="stat"><div class="stat-lbl">'+(isMonthly?'Prev Month':'Yesterday')+'</div><div class="stat-val">'+(yest?'$'+yest.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(yest?yest.units+' units':'')+'</div></div>'+
     '<div class="stat"><div class="stat-lbl">Last 30 Days</div><div class="stat-val">$'+lR.toFixed(2)+'</div><div class="stat-sub">'+fmt(lU)+' units ~ '+fmt(lP)+' KENP</div></div>'+
     '<div class="stat"><div class="stat-lbl">KU Pages</div><div class="stat-val">'+fmt(lP)+'</div><div class="stat-sub">last 30 days</div></div>'+
     '<div class="stat"><div class="stat-lbl">Avg/Unit</div><div class="stat-value">$'+(lU>0?(lR/lU).toFixed(2):'0.00')+'</div><div class="stat-sub">per sale</div></div>'+
