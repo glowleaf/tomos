@@ -1,4 +1,4 @@
-class KDPXLSXParser {
+export class KDPXLSXParser {
   constructor() {
     this.sheetParsers = {
       'Summary': this.parseSummary.bind(this),
@@ -414,6 +414,4 @@ class KDPXLSXParser {
   }
 }
 
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = KDPXLSXParser;
-}
+export default KDPXLSXParser;
