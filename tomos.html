@@ -180,7 +180,7 @@ tr:hover td{background:#f7fafc}
           <div class="dz-icon">↓</div>
           <div class="dz-text">Drop KDP XLSX files</div>
           <div class="dz-sub">or click to select</div>
-          <input type="file" id="fileInput" class="file-input" accept=".xlsx,.csv,.json" multiple>
+          <input type="file" id="fileInput" class="file-input" accept=".xlsx,.csv,.json" multiple webkitdirectory>
         </div>
       </div>
       <div class="settings-card">
@@ -250,12 +250,21 @@ function setupActions(){
 }
 
 async function handleFiles(files){
+  var results={xlsx:0,csv:0,json:0,err:0},total=files.length;
   for(var f of files){
-    if(f.name.endsWith('.xlsx'))await importXLSX(f);
-    else if(f.name.endsWith('.csv'))await importCSV(f);
-    else if(f.name.endsWith('.json'))impJSON(f);
-    else n('Skip: '+f.name);
+    try{
+      if(f.name.endsWith('.xlsx')){await importXLSX(f);results.xlsx++}
+      else if(f.name.endsWith('.csv')){await importCSV(f);results.csv++}
+      else if(f.name.endsWith('.json')){impJSON(f);results.json++}
+      else results.err++;
+    }catch(e){results.err++}
   }
+  var parts=[];
+  if(results.xlsx)parts.push(results.xlsx+' XLSX');
+  if(results.csv)parts.push(results.csv+' CSV');
+  if(results.json)parts.push(results.json+' JSON');
+  if(results.err)parts.push(results.err+' errors');
+  n('Imported '+parts.join(', ')+' from '+total+' file(s)');
 }
 
 // == ADS CSV PARSER ==
@@ -329,7 +338,7 @@ function impJSON(file){
 function merge(a){
   (a.books||[]).forEach(b=>{var k=b.asin||b.title,e=books.find(x=>(x.asin||x.title)===k);if(e){e.royalties=Math.max(e.royalties||0,b.royalties||0);e.units=Math.max(e.units||0,b.units||0);e.pageReads=Math.max(e.pageReads||0,b.pageReads||0)}else books.push({...b})});
   (a.dailyHistory||[]).forEach(d=>{var e=days.find(x=>x.date===d.date);if(e){e.royalties=Math.max(e.royalties||0,d.royalties||0);e.units=Math.max(e.units||0,d.units||0);e.pageReads=Math.max(e.pageReads||0,d.pageReads||0)}else days.push({...d})});
-  raw={books,dailyHistory:days,today:a.today,thisMonth:a.thisMonth,last30Days:a.last30Days,lastUpdated:new Date().toISOString()};
+  raw={books,dailyHistory:days,today:a.today,thisMonth:a.thisMonth,last30Days:a.last30Days,lastUpdated:new Date().toISOString(),isMonthly:raw.isMonthly||a.isMonthly};
 }
 
 function save(){try{localStorage.setItem(KEY,JSON.stringify({...raw,adsData}))}catch(e){}}
