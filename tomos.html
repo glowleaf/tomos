@@ -204,7 +204,14 @@ function setupTabs(){
       document.querySelectorAll('.tab-pane').forEach(x=>x.classList.remove('active'));
       a.classList.add('active');
       var p=document.getElementById('tab-'+a.dataset.tab);
-      if(p){p.classList.add('active');if(a.dataset.tab==='history')renderHistory('30');if(a.dataset.tab==='ads')renderAds('30');if(a.dataset.tab==='books')renderBooks()}
+      if(p){
+        p.classList.add('active');
+        requestAnimationFrame(function(){
+          if(a.dataset.tab==='history')renderHistory('30');
+          if(a.dataset.tab==='ads')renderAds('30');
+          if(a.dataset.tab==='books')renderBooks();
+        });
+      }
     });
   });
 }
