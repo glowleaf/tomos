@@ -424,6 +424,23 @@ async function importXLSX(file){
           }
         }
       }
+      // Also add KENP per book from KENP sheet
+      var kp=r['KENP'];
+      if(kp&&kp.length>1){
+        var kh=kp[0],kdi=kh.findIndex(x=>/date/i.test(x)),kai=kh.findIndex(x=>/ebook asin|^asin$/i.test(x));
+        var kti=kh.findIndex(x=>/title/i.test(x)),kpi=kh.findIndex(x=>/kenp|pages|read/i.test(x));
+        for(var i=1;i<kp.length;i++){
+          var row=kp[i],d=kdi>=0?String(row[kdi]||'').slice(0,10):'';
+          var match=isMonthly?(d.slice(0,7)===cutoffStr):(d>=cutoffStr);
+          if(match){
+            var asin=kai>=0?String(row[kai]||''):'',pages=parseFloat(row[kpi])||0;
+            if(asin&&pages){
+              if(!top30[asin])top30[asin]={asin,title:kti>=0?String(row[kti]||'Unknown'):'Unknown',royalties:0,units:0,pageReads:0};
+              top30[asin].pageReads+=pages;
+            }
+          }
+        }
+      }
       a.top30Books=Object.values(top30).sort((x,y)=>(y.royalties||0)-(x.royalties||0));
     }
     merge(a);renderToday();n('Imported '+a.books.length+' books');
