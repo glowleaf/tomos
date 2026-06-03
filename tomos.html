@@ -325,11 +325,18 @@ async function importXLSX(file){
   try{
     var p=new KDPXLSXParser(),r=await p.parseFromFile(file),a=p.toAppData(r);
     if(!a.books||!a.books.length){n('No data in '+file.name);return}
-    // Auto-convert date format to match incoming data
-    if(a.isMonthly!==undefined&&raw.isMonthly!==undefined&&raw.dailyHistory&&raw.dailyHistory.length>0&&a.isMonthly!==raw.isMonthly){
-      // Date formats differ - replace days with incoming data, keep books merged
-      days=(a.dailyHistory||[]).map(d=>({...d}));
-      raw.isMonthly=a.isMonthly;
+    // Normalize mixed date formats: if any entry is monthly (len<=7), make all entries monthly
+    if(a.dailyHistory&&a.dailyHistory.some(d=>d.date&&d.date.length<=7)){
+      var monthly={};
+      a.dailyHistory.forEach(d=>{
+        var m=d.date.length<=7?d.date:d.date.slice(0,7);
+        if(!monthly[m])monthly[m]={date:m,royalties:0,units:0,pageReads:0};
+        monthly[m].royalties+=d.royalties||0;
+        monthly[m].units+=d.units||0;
+        monthly[m].pageReads+=d.pageReads||0;
+      });
+      a.dailyHistory=Object.values(monthly).sort((x,y)=>x.date.localeCompare(y.date));
+      a.isMonthly=true;
     }
     merge(a);save();renderToday();n('Imported '+a.books.length+' books');
   }catch(e){n('Error: '+e.message)}
