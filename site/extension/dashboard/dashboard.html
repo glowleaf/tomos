@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tomos Book Sales</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div id="app">
+    <nav class="topbar">
+      <div class="topbar-left">
+        <h1 class="logo">Tomos Book Sales</h1>
+        <span class="tag">Extension</span>
+      </div>
+      <div class="topbar-right">
+        <button id="refreshBtn" class="topbar-btn" title="Refresh">↻</button>
+        <button id="exportBtn" class="topbar-btn" title="Export JSON">↓</button>
+        <span id="syncStatus" class="sync-status"></span>
+      </div>
+    </nav>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="today">Today</button>
+      <button class="tab" data-tab="historical">Historical</button>
+      <button class="tab" data-tab="books">Books</button>
+      <button class="tab" data-tab="settings">Settings</button>
+    </div>
+
+    <!-- TODAY TAB -->
+    <div id="tab-today" class="tab-pane active">
+      <div class="hero">
+        <div class="hero-amount" id="todayAmount">$0.00</div>
+        <div class="hero-label" id="todayLabel">earned today</div>
+        <div class="hero-sub" id="todaySub">from 0 books</div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-box">
+          <div class="stat-label">Today</div>
+          <div class="stat-value" id="statToday">$0.00</div>
+          <div class="stat-sub" id="statTodayUnits">0 units</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Yesterday</div>
+          <div class="stat-value" id="statYesterday">$0.00</div>
+          <div class="stat-sub" id="statYesterdayUnits">0 units</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">This Month</div>
+          <div class="stat-value" id="statMonth">$0.00</div>
+          <div class="stat-sub" id="statMonthUnits">0 units</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Last 30 Days</div>
+          <div class="stat-value" id="stat30">$0.00</div>
+          <div class="stat-sub" id="stat30Units">0 units</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">KU Page Reads</div>
+          <div class="stat-value" id="statKU">0</div>
+          <div class="stat-sub" id="statKULabel">last 30 days</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Avg Royalty/Unit</div>
+          <div class="stat-value" id="statAvg">$0.00</div>
+          <div class="stat-sub" id="statAvgLabel">per sale</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <h3>Top Books</h3>
+          <span class="badge" id="topBooksCount">0</span>
+        </div>
+        <div id="topBooks" class="book-grid"></div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <h3>7-Day Trend</h3>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="trendChart"></canvas>
+        </div>
+      </div>
+
+      <div class="section" id="importHelp" style="display:none">
+        <div class="help-card">
+          <strong>No data yet?</strong> Download your reports from <a href="https://kdpreports.amazon.com/dashboard" target="_blank">KDP Reports</a>, then drop the <code>.xlsx</code> files in <strong>Settings → Import</strong>.
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORICAL TAB -->
+    <div id="tab-historical" class="tab-pane">
+      <div class="stat-grid">
+        <div class="stat-box">
+          <div class="stat-label">Total Royalties</div>
+          <div class="stat-value" id="histTotalRoyalties">$0.00</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Total Units</div>
+          <div class="stat-value" id="histTotalUnits">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Total KENP</div>
+          <div class="stat-value" id="histTotalKENP">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Days</div>
+          <div class="stat-value" id="histTotalDays">0</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <h3>All Time Earnings</h3>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="historicalChart"></canvas>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <h3>Daily Breakdown</h3>
+        </div>
+        <div class="table-scroll">
+          <table class="data-table" id="historyTable">
+            <thead><tr><th>Date</th><th>Royalties</th><th>Units</th><th>KENP</th><th>Avg/Unit</th></tr></thead>
+            <tbody id="historyBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOOKS TAB -->
+    <div id="tab-books" class="tab-pane">
+      <div class="section-header">
+        <h3>All Books</h3>
+        <span class="badge" id="allBooksCount">0</span>
+      </div>
+      <div class="search-bar">
+        <input type="text" id="bookSearch" placeholder="Search books..." class="search-input">
+        <select id="bookSort" class="sort-select">
+          <option value="earnings">Earnings</option>
+          <option value="units">Units</option>
+          <option value="title">Title</option>
+        </select>
+      </div>
+      <div id="allBooks" class="book-grid"></div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div id="tab-settings" class="tab-pane">
+      <div class="settings-grid">
+        <div class="settings-card">
+          <h3>Import Reports</h3>
+          <p>Download your <code>.xlsx</code> reports from <a href="https://kdpreports.amazon.com/dashboard" target="_blank">KDP Reports</a>, then drop them here.</p>
+          <div id="dropZone" class="drop-zone">
+            <div class="dz-icon">↓</div>
+            <div class="dz-text">Drop KDP XLSX files</div>
+            <div class="dz-sub">or click to select</div>
+            <input type="file" class="file-input" accept=".xlsx,.json" multiple>
+          </div>
+        </div>
+        <div class="settings-card">
+          <h3>Data</h3>
+          <div class="stat-line"><span>Last Updated</span> <strong id="sUpdated">—</strong></div>
+          <div class="stat-line"><span>Books</span> <strong id="sBooks">0</strong></div>
+          <div class="stat-line"><span>Days of History</span> <strong id="sDays">0</strong></div>
+          <div class="stat-line"><span>Total Royalties</span> <strong id="sTotal">$0.00</strong></div>
+          <div class="settings-actions">
+            <button id="exportDataBtn" class="btn">Export JSON</button>
+            <button id="clearDataBtn" class="btn btn-danger">Clear All</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="notification" class="notif"></div>
+  <script src="../lib/xlsx.full.min.js"></script>
+  <script src="../lib/xlsx-parser.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>

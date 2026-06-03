@@ -1,0 +1,47 @@
+{
+  "manifest_version": 3,
+  "name": "Tomos Book Sales",
+  "version": "1.0.0",
+  "description": "KDP sales dashboard. Import XLSX reports from Amazon KDP and view your book sales with a clean interface.",
+  "permissions": [
+    "storage",
+    "alarms",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://kdpreports.amazon.com/*",
+    "https://*.amazon.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://kdpreports.amazon.com/*"],
+      "js": ["content-script.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["page-script.js", "lib/kdp-parser.js", "lib/merge-helper.js", "lib/xlsx-parser.js"],
+      "matches": ["https://kdpreports.amazon.com/*"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "Tomos Book Sales",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

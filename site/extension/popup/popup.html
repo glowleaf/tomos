@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div id="app">
+    <div class="hero">
+      <div class="hero-amount" id="heroAmount">$0.00</div>
+      <div class="hero-label">earned today</div>
+      <div class="hero-sub" id="heroSub">from 0 books</div>
+    </div>
+
+    <div class="stats">
+      <div class="mini-stat">
+        <span class="mini-label">Month</span>
+        <span class="mini-value" id="miniMonth">$0</span>
+      </div>
+      <div class="mini-stat">
+        <span class="mini-label">30 Days</span>
+        <span class="mini-value" id="mini30">$0</span>
+      </div>
+      <div class="mini-stat">
+        <span class="mini-label">KU Reads</span>
+        <span class="mini-value" id="miniKU">0</span>
+      </div>
+    </div>
+
+    <div class="step-guide" id="stepGuide">
+      <div class="step">1. Go to KDP Reports and log in</div>
+      <div class="step">2. Click <strong>Tomos Import</strong> button (bottom-right)</div>
+      <div class="step done">3. Data imports automatically →</div>
+    </div>
+
+    <div class="recent" id="recentBooks">
+      <div class="recent-item dim">No data yet</div>
+    </div>
+
+    <div class="actions">
+      <button id="openKdpBtn" class="action-btn primary">1. Open KDP Reports</button>
+      <button id="openDashboardBtn" class="action-btn">2. Open Dashboard</button>
+    </div>
+
+    <div class="footer">
+      <span id="footerSync">Waiting for data...</span>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
