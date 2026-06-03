@@ -5,118 +5,92 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tomos Book Sales</title>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.mini.min.js"></script>
+<script src="extension/lib/xlsx-parser.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;color:#1a202c;background:#fff;min-height:100vh}
-.container{max-width:1100px;margin:0 auto;padding:20px}
-/* Logo */
-.logo-wrap{text-align:center;padding:20px 0}
-.logo{font-size:22px;font-weight:800;color:#2b6cb0;letter-spacing:-.5px}
-/* Tabs */
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;color:#333;background:#fff}
+.container{max-width:1000px;margin:0 auto;padding:20px}
+.logo{text-align:center;padding:16px 0}
+.logo img{height:32px}
+.logo span{font-size:20px;font-weight:700;color:#2b6cb0;display:block;margin-top:4px}
 .nav-tabs{display:flex;gap:0;border-bottom:2px solid #e2e8f0;margin-bottom:20px}
-.nav-tabs a{padding:10px 20px;text-decoration:none;color:#718096;font-size:14px;font-weight:500;border-bottom:2px solid transparent;margin-bottom:-2px;transition:.15s}
+.nav-tabs a{padding:10px 20px;text-decoration:none;color:#718096;font-size:14px;font-weight:500;border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer}
 .nav-tabs a:hover{color:#4299e1}
-.nav-tabs a.active,.nav-tabs .active a{color:#2b6cb0;border-bottom-color:#2b6cb0;font-weight:600}
+.nav-tabs a.active{color:#2b6cb0;border-bottom-color:#2b6cb0;font-weight:600}
 .tab-pane{display:none}
 .tab-pane.active{display:block}
-/* Hero */
-.text-center{text-align:center}
-.hero-amount{font-size:42px;font-weight:800;color:#1a202c;line-height:1.2}
+.text-center{text-align:center;padding:20px 0}
+.hero-amount{font-size:48px;font-weight:800;color:#1a202c}
 .hero-label{font-size:16px;color:#718096;margin-top:4px}
 .hero-sub{font-size:15px;color:#718096;margin-top:2px}
 .hero-sub strong{color:#4a5568}
 hr{border:none;border-top:1px solid #e2e8f0;margin:15px 0}
-/* Stats row */
-.stats-row{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:20px}
-.stat-card{flex:1;min-width:150px;background:#f7fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px}
-.stat-label{font-size:11px;text-transform:uppercase;color:#718096;letter-spacing:.5px}
-.stat-value{font-size:22px;font-weight:700;color:#1a202c;margin-top:2px}
-.stat-sub{font-size:12px;color:#718096;margin-top:2px}
-/* Section header */
+.stats{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:20px}
+.stat{flex:1;min-width:140px;background:#f7fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px}
+.stat-lbl{font-size:10px;text-transform:uppercase;color:#a0aec0;letter-spacing:.5px}
+.stat-val{font-size:22px;font-weight:700;color:#1a202c;margin-top:2px}
+.stat-sub{font-size:11px;color:#a0aec0;margin-top:2px}
 .sectionHeader{display:flex;justify-content:space-between;align-items:center;margin:15px 0}
 .sectionHeader h3{font-size:16px;font-weight:600;color:#1a202c}
-/* Book list */
 .book-list{display:grid;gap:6px}
-.book-item{display:flex;align-items:center;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;text-decoration:none;color:inherit;transition:.15s}
-.book-item:hover{border-color:#4299e1;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-.book-cover{width:40px;height:60px;border-radius:4px;object-fit:cover;flex-shrink:0;background:#edf2f7;margin-right:12px;overflow:hidden}
-.book-rank{width:24px;height:24px;border-radius:50%;background:#ebf4ff;color:#4299e1;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-right:10px}
+.book-item{display:flex;align-items:center;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;text-decoration:none;color:inherit}
+.book-item:hover{border-color:#4299e1}
+.book-cover{width:38px;height:57px;border-radius:4px;object-fit:cover;flex-shrink:0;background:#edf2f7;margin-right:10px}
+.book-rank{width:22px;height:22px;border-radius:50%;background:#ebf4ff;color:#4299e1;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-right:10px}
 .book-info{flex:1;min-width:0}
 .book-title{font-size:13px;font-weight:600;color:#1a202c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.book-meta{font-size:11px;color:#718096;margin-top:1px}
-.book-stats{text-align:right;flex-shrink:0;margin-left:12px}
-.book-earnings{font-size:15px;font-weight:700;color:#1a202c}
-.book-units{font-size:11px;color:#718096}
-/* Table scroll */
-.table-scroll{overflow-x:auto;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:20px}
-.table-scroll table{min-width:600px}
-/* Table */
+.book-meta{font-size:11px;color:#a0aec0}
+.book-stats{text-align:right;flex-shrink:0;margin-left:10px}
+.book-earnings{font-size:14px;font-weight:700;color:#1a202c}
+.book-units{font-size:11px;color:#a0aec0}
 .table-wrap{overflow-x:auto;border:1px solid #e2e8f0;border-radius:8px}
 table{width:100%;border-collapse:collapse;font-size:13px}
-th{text-align:left;padding:10px 14px;font-size:10px;text-transform:uppercase;color:#718096;background:#f7fafc;border-bottom:1px solid #e2e8f0;font-weight:600;letter-spacing:.5px}
-td{padding:10px 14px;border-bottom:1px solid #edf2f7;color:#4a5568}
+th{text-align:left;padding:9px 14px;font-size:10px;text-transform:uppercase;color:#a0aec0;background:#f7fafc;border-bottom:1px solid #e2e8f0;font-weight:600}
+td{padding:9px 14px;border-bottom:1px solid #edf2f7;color:#4a5568}
 tr:last-child td{border-bottom:none}
-tr:hover td{background:#f7fafc}
-/* Chart */
-.chart-box{height:200px;border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:20px}
+.chart-row{display:flex;gap:20px;margin:20px 0;flex-wrap:wrap}
+.chart-box{flex:1;min-width:250px;height:220px;border:1px solid #e2e8f0;border-radius:8px;padding:10px}
 .chart-box canvas{width:100%!important;height:100%!important}
-/* Drop zone */
-.drop-zone{border:2px dashed #cbd5e0;border-radius:8px;padding:30px;text-align:center;cursor:pointer;transition:.15s;background:#f7fafc;margin-top:12px}
-.drop-zone:hover,.drop-zone.dragover{border-color:#4299e1;background:#ebf4ff}
-.dz-icon{font-size:30px;color:#718096;margin-bottom:6px}
+.drop-zone{border:2px dashed #cbd5e0;border-radius:8px;padding:40px;text-align:center;cursor:pointer;background:#f7fafc;margin-top:12px}
+.drop-zone:hover{border-color:#4299e1;background:#ebf4ff}
+.drop-zone.dragover{border-color:#4299e1;background:#ebf4ff}
+.dz-icon{font-size:32px;color:#a0aec0;margin-bottom:6px}
 .dz-text{font-size:14px;color:#4a5568;font-weight:500}
-.dz-sub{font-size:12px;color:#718096;margin-top:2px}
+.dz-sub{font-size:12px;color:#a0aec0;margin-top:2px}
 .file-input{display:none}
-/* Buttons */
-.btn{display:inline-block;padding:8px 18px;border-radius:6px;border:1px solid #e2e8f0;background:#fff;color:#4a5568;font-size:12px;font-weight:500;cursor:pointer;transition:.15s;text-decoration:none}
-.btn:hover{background:#f7fafc;border-color:#cbd5e0}
-.btn-danger{color:#e53e3e;border-color:#e53e3e}
-.btn-danger:hover{background:#fff5f5}
-.btn-sm{padding:5px 12px;font-size:11px}
-/* Settings */
 .settings-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
 .settings-card{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:20px}
 .settings-card h3{font-size:14px;font-weight:600;margin-bottom:12px}
-.settings-card p{font-size:13px;color:#4a5568;line-height:1.6;margin-bottom:8px}
+.settings-card p{font-size:13px;color:#4a5568;line-height:1.6}
 .settings-card a{color:#4299e1;text-decoration:none}
-.settings-card a:hover{text-decoration:underline}
 .stat-line{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;color:#4a5568;border-bottom:1px solid #edf2f7}
-.stat-line:last-child{border-bottom:none}.stat-line strong{color:#1a202c}
+.stat-line:last-child{border-bottom:none}
+.stat-line strong{color:#1a202c}
 .actions{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
-/* Search */
+.btn{display:inline-block;padding:7px 16px;border-radius:6px;border:1px solid #e2e8f0;background:#fff;color:#4a5568;font-size:12px;cursor:pointer}
+.btn:hover{background:#f7fafc}
+.btn-danger{color:#e53e3e;border-color:#e53e3e}
+.btn-danger:hover{background:#fff5f5}
 .search-bar{display:flex;gap:8px;margin-bottom:12px}
 .search-input{flex:1;padding:8px 12px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;outline:none}
-.search-input:focus{border-color:#4299e1;box-shadow:0 0 0 3px rgba(66,153,225,.15)}
-.sort-select{padding:8px 12px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;background:#fff;cursor:pointer;outline:none}
-/* Notification */
+.search-input:focus{border-color:#4299e1}
+.sort-select{padding:8px 12px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;background:#fff;cursor:pointer}
+.empty-state{text-align:center;padding:40px 20px;color:#a0aec0;font-size:13px}
 #notif{position:fixed;bottom:20px;right:20px;background:#1a202c;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;z-index:200;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none}
 #notif.show{opacity:1;transform:translateY(0)}
-/* Series */
-.series-list{display:grid;gap:6px}
-.series-item{display:flex;justify-content:space-between;align-items:center;padding:14px;border:1px solid #e2e8f0;border-radius:8px}
-.series-name{font-weight:600;font-size:14px}
-.series-meta{font-size:12px;color:#718096;margin-top:2px}
-.series-earnings{font-weight:700;font-size:16px;color:#1a202c}
-/* Empty state */
-.empty-state{text-align:center;padding:40px 20px;color:#718096;font-size:13px;line-height:1.6}
 </style>
 </head>
 <body>
 
-<div class="container" id="app">
-  <div class="logo-wrap">
-    <img src="extension/icons/icon128.png?t=$(date +%s)" alt="Tomos" style="height:32px;width:auto;display:block;margin:0 auto 4px">
-    <div class="logo">Tomos Book Sales</div>
-  </div>
+<div class="container">
+  <div class="logo"><span>Tomos Book Sales</span></div>
 
-  <ul class="nav-tabs" id="tabs">
-    <li class="active"><a href="#" data-tab="today">Today</a></li>
-    <li><a href="#" data-tab="historical">Historical</a></li>
-    <li><a href="#" data-tab="series">Series</a></li>
-    <li><a href="#" data-tab="books">Books</a></li>
-    <li><a href="#" data-tab="ads">Ads</a></li>
-    <li><a href="#" data-tab="settings">Settings</a></li>
-  </ul>
+  <div class="nav-tabs" id="tabs">
+    <a class="active" data-tab="today">Today</a>
+    <a data-tab="history">History</a>
+    <a data-tab="books">Books</a>
+    <a data-tab="import">Import</a>
+  </div>
 
   <!-- TODAY -->
   <div id="tab-today" class="tab-pane active">
@@ -126,30 +100,23 @@ tr:hover td{background:#f7fafc}
       <div class="hero-sub" id="todaySub">from <strong id="todayCount">0</strong> books.</div>
     </div>
     <hr>
-    <div class="stats-row" id="statsRow"></div>
-    <div class="sectionHeader"><h3>Top Books</h3></div>
+    <div class="stats" id="stats"></div>
+    <div class="sectionHeader"><h3>Top Books <span id="topPeriod" style="font-size:12px;font-weight:400;color:#a0aec0">past 30 days</span></h3></div>
     <div id="topBooks" class="book-list"></div>
-    <hr>
-    <div class="sectionHeader"><h3>7-Day Trend</h3></div>
-    <div class="chart-box"><canvas id="trendChart"></canvas></div>
+    <div class="chart-row">
+      <div class="chart-box"><canvas id="pieChart"></canvas></div>
+      <div class="chart-box"><canvas id="barChart"></canvas></div>
+    </div>
   </div>
 
-  <!-- HISTORICAL -->
-  <div id="tab-historical" class="tab-pane">
-    <div class="stats-row" id="histStats"></div>
-    <div class="sectionHeader"><h3>Daily Earnings</h3></div>
-    <div class="chart-box"><canvas id="histChart"></canvas></div>
+  <!-- HISTORY -->
+  <div id="tab-history" class="tab-pane">
+    <div class="stats" id="histStats"></div>
     <div class="sectionHeader"><h3>Daily Breakdown</h3></div>
     <div class="table-wrap">
       <table><thead><tr><th>Date</th><th>Royalties</th><th>Units</th><th>KENP</th><th>Avg/Unit</th></tr></thead>
       <tbody id="historyBody"></tbody></table>
     </div>
-  </div>
-
-  <!-- SERIES -->
-  <div id="tab-series" class="tab-pane">
-    <div class="sectionHeader"><h3>Series Performance</h3></div>
-    <div id="seriesList" class="series-list"></div>
   </div>
 
   <!-- BOOKS -->
@@ -162,66 +129,48 @@ tr:hover td{background:#f7fafc}
     <div id="allBooks" class="book-list"></div>
   </div>
 
-  <!-- ADS -->
-  <div id="tab-ads" class="tab-pane">
-    <div class="stats-row" id="adsStats"></div>
-    <div class="sectionHeader"><h3>Campaign Performance</h3></div>
-    <div class="table-scroll"><table><thead><tr><th>Campaign</th><th>Spend</th><th>Sales</th><th>ACOS</th><th>Purchases</th><th>Impressions</th><th>Clicks</th><th>CTR</th><th>CPC</th></tr></thead>
-    <tbody id="adsBody"></tbody></table></div>
-  </div>
-
-  <!-- SETTINGS -->
-  <div id="tab-settings" class="tab-pane">
+  <!-- IMPORT -->
+  <div id="tab-import" class="tab-pane">
     <div class="settings-grid">
       <div class="settings-card">
-        <h3>Import Reports</h3>
-        <p>Download <code>KDP_Dashboard-*.xlsx</code> or <code>KDP_Orders-*.xlsx</code> from <a href="https://kdpreports.amazon.com/dashboard" target="_blank">KDP Reports</a>, then drop them here.</p>
+        <h3>Import KDP Reports</h3>
+        <p>Drop <code>KDP_Dashboard-*.xlsx</code> or <code>KDP_Orders-*.xlsx</code> from <a href="https://kdpreports.amazon.com/dashboard" target="_blank">KDP Reports</a>.</p>
         <div id="dropZone" class="drop-zone">
           <div class="dz-icon">↓</div>
-          <div class="dz-text">Drop KDP XLSX files</div>
+          <div class="dz-text">Drop XLSX files here</div>
           <div class="dz-sub">or click to select</div>
-          <input type="file" id="fileInput" class="file-input" accept=".xlsx,.csv,.json" multiple>
+          <input type="file" id="fileInput" class="file-input" accept=".xlsx,.json" multiple>
         </div>
       </div>
       <div class="settings-card">
-        <h3>Data Summary</h3>
-        <div class="stat-line"><span>Data Type</span><strong id="sType" style="font-size:11px">-</strong></div>
-        <div class="stat-line"><span>Last Updated</span><strong id="sUpdated">-</strong></div>
-        <div class="stat-line"><span>Books Tracked</span><strong id="sBooks">0</strong></div>
+        <h3>Data</h3>
+        <div class="stat-line"><span>Imported</span><strong id="sInfo">No data</strong></div>
+        <div class="stat-line"><span>Books</span><strong id="sBooks">0</strong></div>
         <div class="stat-line"><span>Days</span><strong id="sDays">0</strong></div>
-        <div class="stat-line"><span>Total Sales</span><strong id="sTotal">$0.00</strong></div>
-        <div class="stat-line"><span>Total KENP</span><strong id="sKENP">0</strong></div>
-        <div class="stat-line"><span>Last 5 days</span><strong id="sLastDays" style="font-size:11px;max-width:180px;text-align:right">-</strong></div>
         <div class="actions">
-          <button id="exportBtn" class="btn btn-sm">Export JSON</button>
-          <button id="clearBtn" class="btn btn-sm btn-danger">Clear</button>
-          <button id="debugBtn" class="btn btn-sm">Debug dates</button>
+          <button id="exportBtn" class="btn">Export</button>
+          <button id="clearBtn" class="btn btn-danger">Clear</button>
         </div>
-        <pre id="debugOutput" style="display:none;margin-top:8px;background:#1a202c;color:#a0aec0;padding:8px;border-radius:4px;font-size:10px;max-height:300px;overflow-y:auto;white-space:pre-wrap"></pre>
       </div>
     </div>
   </div>
 </div>
-
 <div id="notif"></div>
 
 <script>
-// == PARSER ==
-(function(){var K=class KDPXLSXParser{async parseFromFile(b){return this.parse(await b.arrayBuffer())}async parse(b){var c=XLSX.read(new Uint8Array(b),{type:"array"}),d={};c.SheetNames.forEach(e=>{var f=c.Sheets[e];f&&(d[e]=XLSX.utils.sheet_to_json(f,{header:1,defval:""}))});return d}toAppData(b){var c={today:null,thisMonth:null,last30Days:null,dailyHistory:[],books:[],lastUpdated:(new Date).toISOString()},d=new Map,e=new Map;if(b["Combined Sales"]){var f=b["Combined Sales"][0]||[],g=f.findIndex(h=>/date|royalty/i.test(h)),i=f.findIndex(h=>/title/i.test(h)),j=f.findIndex(h=>/asin|isbn/i.test(h)),k=f.findIndex(h=>/^net units|net sold/i.test(h)),l=f.findIndex(h=>/^royalty$/i.test(h));for(let h=1;h<b["Combined Sales"].length;h++){var m=b["Combined Sales"][h],n=g>=0?String(m[g]||"").slice(0,10):"",o=j>=0?String(m[j]||""):"",p=i>=0?String(m[i]||""):"Unknown",q=parseFloat(m[k])||0,r=parseFloat(m[l])||0;if(o&&(r||q)){var s=o;d.has(s)||d.set(s,{asin:o,title:p,royalties:0,units:0,pageReads:0});var t=d.get(s);t.royalties+=r,t.units+=q}if(n&&(r||q)){e.has(n)||e.set(n,{date:n,royalties:0,units:0,pageReads:0});var u=e.get(n);u.royalties+=r,u.units+=q}}}if(b.KENP){var v=b.KENP[0]||[],w=v.findIndex(h=>/date/i.test(h)),x=v.findIndex(h=>/ebook asin|^asin$/i.test(h)),y=v.findIndex(h=>/title/i.test(h)),z=v.findIndex(h=>/kenp|pages|read/i.test(h));for(let h=1;h<b.KENP.length;h++){var A=b.KENP[h],B=w>=0?String(A[w]||"").slice(0,10):"",C=x>=0?String(A[x]||""):"",D=parseFloat(A[z])||0;if(C&&D){var E=C;if(!d.has(E)){var F=y>=0?String(A[y]||""):"";d.set(E,{asin:C,title:F,royalties:0,units:0,pageReads:0})}d.get(E).pageReads+=D}if(B&&D){e.has(B)||e.set(B,{date:B,royalties:0,units:0,pageReads:0});e.get(B).pageReads+=D}}}c.books=Array.from(d.values()).sort((G,H)=>(H.royalties||0)-(G.royalties||0));c.dailyHistory=Array.from(e.values()).sort((G,H)=>(G.date||"").localeCompare(H.date||""));c.isMonthly=c.dailyHistory.length>0&&c.dailyHistory[0].date&&c.dailyHistory[0].date.length<=7;if(c.dailyHistory.length>0){var I=c.dailyHistory[c.dailyHistory.length-1];c.today={date:I.date,totalRoyalties:I.royalties,totalUnits:I.units,totalPageReads:I.pageReads,books:c.books.slice(0,20)}}if(c.dailyHistory.length>0){var J=c.dailyHistory.slice(-30);c.last30Days={totalRoyalties:J.reduce((G,H)=>G+H.royalties,0),totalUnits:J.reduce((G,H)=>G+H.units,0),totalPageReads:J.reduce((G,H)=>G+H.pageReads,0),books:c.books.slice(0,20)}}return c}};window.KDPXLSXParser=K;typeof module!="undefined"&&module.exports&&(module.exports=K);})();
-
 const KEY='tomos_data';let books=[],days=[],raw={};
 
 document.addEventListener('DOMContentLoaded',()=>{setupTabs();setupDrop();setupActions();load()});
 
 function setupTabs(){
-  document.querySelectorAll('.nav-tabs a').forEach(a=>{
+  document.querySelectorAll('#tabs a').forEach(a=>{
     a.addEventListener('click',e=>{
       e.preventDefault();
-      document.querySelectorAll('.nav-tabs li').forEach(l=>l.classList.remove('active'));
-      document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
-      a.parentElement.classList.add('active');
+      document.querySelectorAll('#tabs a').forEach(x=>x.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(x=>x.classList.remove('active'));
+      a.classList.add('active');
       var p=document.getElementById('tab-'+a.dataset.tab);
-      if(p){p.classList.add('active');if(a.dataset.tab==='historical')renderHist();if(a.dataset.tab==='series')renderSeries();if(a.dataset.tab==='books')renderBooks();if(a.dataset.tab==='ads')renderAds();if(a.dataset.tab==='settings')renderSets()}
+      if(p){p.classList.add('active');if(a.dataset.tab==='history')renderHist();if(a.dataset.tab==='books')renderBooks()}
     });
   });
 }
@@ -240,171 +189,62 @@ function setupActions(){
   document.getElementById('clearBtn').addEventListener('click',doClear);
   document.getElementById('bookSearch').addEventListener('input',renderBooks);
   document.getElementById('bookSort').addEventListener('change',renderBooks);
-  var dbg=document.getElementById('debugBtn');
-  if(dbg)dbg.addEventListener('click',function(){
-    var el=document.getElementById('debugOutput');
-    if(el.style.display==='block'){el.style.display='none';return}
-    el.style.display='block';
-    el.textContent='Total days: '+days.length+'\nLast 10:\n'+days.slice(-10).map(d=>d.date+' $'+d.royalties.toFixed(2)+' '+d.units+'u '+d.pageReads+'p').join('\n');
-  });
 }
 
 async function handleFiles(files){
-  var results={xlsx:0,csv:0,json:0,err:0},total=files.length;
   for(var f of files){
-    try{
-      if(f.name.endsWith('.xlsx')){await importXLSX(f);results.xlsx++}
-      else if(f.name.endsWith('.csv')){await importCSV(f);results.csv++}
-      else if(f.name.endsWith('.json')){impJSON(f);results.json++}
-      else results.err++;
-    }catch(e){results.err++}
+    if(f.name.endsWith('.xlsx'))await importXLSX(f);
+    else n('Skip: '+f.name);
   }
-  var parts=[];
-  if(results.xlsx)parts.push(results.xlsx+' XLSX');
-  if(results.csv)parts.push(results.csv+' CSV');
-  if(results.json)parts.push(results.json+' JSON');
-  if(results.err)parts.push(results.err+' errors');
-  n('Imported '+parts.join(', ')+' from '+total+' file(s)');
+  save();
 }
-
-// == ADS CSV PARSER ==
-let adsData=[];
-
-async function importCSV(file){
-  try{
-    var text=await file.text(),lines=text.split(/\n/).filter(l=>l.trim());
-    if(lines.length<2){n('Empty CSV');return}
-    var header=parseCSVLine(lines[0]),rows=lines.slice(1).map(parseCSVLine);
-    var ci=name=>header.findIndex(h=>h.trim().toLowerCase().includes(name));
-    var nameIdx=ci('campaign name'),spendIdx=ci('total cost')||ci('total cost (converted)');
-    var salesIdx=ci('sales')||ci('sales (converted)'),acosIdx=ci('acos');
-    var purIdx=ci('purchases'),impIdx=ci('impressions'),clickIdx=ci('clicks');
-    var ctrIdx=ci('ctr'),cpcIdx=ci('cpc')||ci('cpc (converted)');
-    var kenpIdx=ci('kenp read'),kenpRoyIdx=ci('estimated kenp royalties');
-
-    rows.forEach(r=>{
-      var name=nameIdx>=0?r[nameIdx]:'',spend=parseMoney(r[spendIdx]),sales=parseMoney(r[salesIdx]);
-      var acos=acosIdx>=0?parseFloat(r[acosIdx]):(spend>0?sales/spend:0);
-      if(name&&(spend>0||sales>0)){
-        var existing=adsData.find(a=>a.name===name);
-        if(existing){
-          existing.spend+=spend;existing.sales+=sales;existing.purchases+=(parseMoney(r[purIdx]));
-          existing.impressions+=(parseFloat(r[impIdx])||0);existing.clicks+=(parseFloat(r[clickIdx])||0);
-          existing.kenpRead+=(parseFloat(r[kenpIdx])||0);existing.kenpRoyalties+=(parseFloat(r[kenpRoyIdx])||0);
-          existing.acos=existing.spend>0?existing.sales/existing.spend:0;
-        }else{
-          adsData.push({
-            name,spend,sales,acos:spend>0?sales/spend:0,
-            purchases:parseMoney(r[purIdx]),impressions:parseFloat(r[impIdx])||0,
-            clicks:parseFloat(r[clickIdx])||0,ctr:parseFloat(r[ctrIdx])||0,cpc:parseMoney(r[cpcIdx]),
-            kenpRead:parseFloat(r[kenpIdx])||0,kenpRoyalties:parseFloat(r[kenpRoyIdx])||0
-          });
-        }
-      }
-    });
-    save();n('Imported '+adsData.length+' campaigns');
-    if(document.getElementById('tab-ads').classList.contains('active'))renderAds();
-  }catch(e){n('CSV error: '+e.message)}
-}
-
-function parseCSVLine(line){
-  var result=[],current='',inQuote=false;
-  for(var i=0;i<line.length;i++){
-    var c=line[i];
-    if(c==='"'){inQuote=!inQuote}
-    else if(c===','&&!inQuote){result.push(current);current=''}
-    else{current+=c}
-  }
-  result.push(current);
-  return result;
-}
-
-function parseMoney(s){return parseFloat((s||'').replace(/[$,]/g,''))||0}
 
 async function importXLSX(file){
   try{
-    var p=new KDPXLSXParser(),r=await p.parseFromFile(file),a=p.toAppData(r);
+    var buf=await file.arrayBuffer(),p=new KDPXLSXParser(),r=await p.parse(buf),a=p.toAppData(r);
     if(!a.books||!a.books.length){n('No data in '+file.name);return}
-    // Normalize mixed date formats: if any entry is monthly (len<=7), make all entries monthly
-    if(a.dailyHistory&&a.dailyHistory.some(d=>d.date&&d.date.length<=7)){
-      var monthly={};
-      a.dailyHistory.forEach(d=>{
-        var m=d.date.length<=7?d.date:d.date.slice(0,7);
-        if(!monthly[m])monthly[m]={date:m,royalties:0,units:0,pageReads:0};
-        monthly[m].royalties+=d.royalties||0;
-        monthly[m].units+=d.units||0;
-        monthly[m].pageReads+=d.pageReads||0;
-      });
-      a.dailyHistory=Object.values(monthly).sort((x,y)=>x.date.localeCompare(y.date));
-      a.isMonthly=true;
-    }
-    merge(a);save();renderToday();n('Imported '+a.books.length+' books');
+    merge(a);renderToday();n('Imported '+a.books.length+' books');
   }catch(e){n('Error: '+e.message)}
-}
-
-function impJSON(file){
-  var r=new FileReader();
-  r.onload=function(){try{merge(JSON.parse(r.result));save();renderToday();n('JSON imported')}catch(e){n('JSON: '+e.message)}};
-  r.readAsText(file);
 }
 
 function merge(a){
   (a.books||[]).forEach(b=>{var k=b.asin||b.title,e=books.find(x=>(x.asin||x.title)===k);if(e){e.royalties=Math.max(e.royalties||0,b.royalties||0);e.units=Math.max(e.units||0,b.units||0);e.pageReads=Math.max(e.pageReads||0,b.pageReads||0)}else books.push({...b})});
   (a.dailyHistory||[]).forEach(d=>{var e=days.find(x=>x.date===d.date);if(e){e.royalties=Math.max(e.royalties||0,d.royalties||0);e.units=Math.max(e.units||0,d.units||0);e.pageReads=Math.max(e.pageReads||0,d.pageReads||0)}else days.push({...d})});
-  raw={books,dailyHistory:days,today:a.today,thisMonth:a.thisMonth,last30Days:a.last30Days,lastUpdated:new Date().toISOString(),isMonthly:raw.isMonthly||a.isMonthly};
+  raw={books,dailyHistory:days,today:a.today,thisMonth:a.thisMonth,last30Days:a.last30Days,lastUpdated:new Date().toISOString()};
 }
 
-function save(){try{localStorage.setItem(KEY,JSON.stringify({...raw,adsData}))}catch(e){}}
-function load(){try{var r=localStorage.getItem(KEY);if(r){var parsed=JSON.parse(r);raw=parsed;books=parsed.books||[];days=parsed.dailyHistory||[];adsData=parsed.adsData||[];normalizeDays();renderToday()}}catch(e){}}
-
-function normalizeDays(){
-  if(!days||days.length<2)return;
-  var hasMonthly=days.some(d=>d.date&&d.date.length<=7);
-  var hasDaily=days.some(d=>d.date&&d.date.length>7);
-  if(hasMonthly&&hasDaily){
-    // Aggregate daily into monthly to match
-    var monthly={};
-    days.forEach(d=>{
-      var m=d.date.length<=7?d.date:d.date.slice(0,7);
-      if(!monthly[m])monthly[m]={date:m,royalties:0,units:0,pageReads:0};
-      monthly[m].royalties+=d.royalties||0;
-      monthly[m].units+=d.units||0;
-      monthly[m].pageReads+=d.pageReads||0;
-    });
-    days=Object.values(monthly).sort((x,y)=>x.date.localeCompare(y.date));
-    raw.isMonthly=true;
-    raw.dailyHistory=days;
-    save();
-  }
-}
-
+function save(){try{localStorage.setItem(KEY,JSON.stringify(raw))}catch(e){}}
+function load(){try{var r=localStorage.getItem(KEY);if(r){var p=JSON.parse(r);raw=p;books=p.books||[];days=p.dailyHistory||[];renderToday()}}catch(e){}}
 
 function renderToday(){
-  var isMonthly=days.some(d=>d.date&&d.date.length<=7);
   var withSales=days.filter(d=>d.royalties>0);
   var today=withSales.length?withSales[withSales.length-1]:null;
   var yest=withSales.length>1?withSales[withSales.length-2]:null;
-  var viewCount=isMonthly?6:30;
-  var viewDays=days.slice(-viewCount),vR=viewDays.reduce((s,d)=>s+(d.royalties||0),0),vU=viewDays.reduce((s,d)=>s+(d.units||0),0),vP=viewDays.reduce((s,d)=>s+(d.pageReads||0),0);
+  var last30=days.slice(-30);
+  var lR=last30.reduce((s,d)=>s+(d.royalties||0),0),lU=last30.reduce((s,d)=>s+(d.units||0),0),lP=last30.reduce((s,d)=>s+(d.pageReads||0),0);
   var allR=days.reduce((s,d)=>s+(d.royalties||0),0),allU=days.reduce((s,d)=>s+(d.units||0),0),allP=days.reduce((s,d)=>s+(d.pageReads||0),0);
-  var now=new Date(),thisMonth=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
-  var monthDays=days.filter(d=>d.date&&d.date.startsWith(thisMonth));
-  var mR=monthDays.reduce((s,d)=>s+(d.royalties||0),0),mU=monthDays.reduce((s,d)=>s+(d.units||0),0),mP=monthDays.reduce((s,d)=>s+(d.pageReads||0),0);
   document.getElementById('todayAmount').textContent=today?'$'+today.royalties.toFixed(2):'$0.00';
-  document.getElementById('todayLabel').textContent=today?'earned '+(isMonthly?'in '+today.date:'on '+fmtD(today.date)):'earned today';
+  document.getElementById('todayLabel').textContent=today?'earned on '+fmtD(today.date):'earned today';
   document.getElementById('todayCount').textContent=books.length;
-  document.getElementById('statsRow').innerHTML=
-    '<div class="stat-card"><div class="stat-label">'+(isMonthly?'Latest Month':'Today')+'</div><div class="stat-value">'+(today?'$'+today.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(today?today.units+' units':'')+'</div></div>'+
-    '<div class="stat-card"><div class="stat-label">'+(isMonthly?'Previous Month':'Yesterday')+'</div><div class="stat-value">'+(yest?'$'+yest.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(yest?yest.units+' units':'')+'</div></div>'+
-    '<div class="stat-card"><div class="stat-label">This Month ('+now.toLocaleString('en-US',{month:'short'})+')</div><div class="stat-value">$'+mR.toFixed(2)+'</div><div class="stat-sub">'+fmt(mU)+' units</div></div>'+
-    '<div class="stat-card"><div class="stat-label">'+(isMonthly?'Last 6 Months':'Last 30 Days')+'</div><div class="stat-value">$'+vR.toFixed(2)+'</div><div class="stat-sub">'+fmt(vU)+' units ~ '+fmt(vP)+' KENP</div></div>'+
-    '<div class="stat-card"><div class="stat-label">KU Page Reads</div><div class="stat-value">'+fmt(vP)+'</div><div class="stat-sub">'+(isMonthly?'last 6 months':'last 30 days')+'</div></div>'+
-    '<div class="stat-card"><div class="stat-label">Avg/Month</div><div class="stat-value">$'+(days.length>0?(allR/days.length).toFixed(2):'0.00')+'</div><div class="stat-sub">per '+(isMonthly?'month':'day')+' ('+fmt(allU/days.length)+' units)</div></div>'+
-    '<div class="stat-card" style="background:#ebf8ff;border-color:#bee3f8"><div class="stat-label">All Time</div><div class="stat-value">$'+allR.toFixed(2)+'</div><div class="stat-sub">'+fmt(allU)+' units ~ '+fmt(allP)+' KENP ~ '+days.length+' '+(isMonthly?'months':'days')+'</div></div>';
-  books.sort((a,b)=>(b.royalties||0)-(a.royalties||0));
-  document.getElementById('topBooks').innerHTML=books.length?books.slice(0,20).map((b,i)=>bookHTML(b,i+1)).join(''):'<div class="empty-state">Drop KDP reports in Settings to start</div>';
-  var chartData=raw.isMonthly?days:days.slice(-7);
-  renderChart(document.getElementById('trendChart'),chartData,'#4299e1',raw.isMonthly);
+  document.getElementById('stats').innerHTML=
+    '<div class="stat"><div class="stat-lbl">Today</div><div class="stat-val">'+(today?'$'+today.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(today?today.units+' units':'')+'</div></div>'+
+    '<div class="stat"><div class="stat-lbl">Yesterday</div><div class="stat-val">'+(yest?'$'+yest.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(yest?yest.units+' units':'')+'</div></div>'+
+    '<div class="stat"><div class="stat-lbl">Last 30 Days</div><div class="stat-val">$'+lR.toFixed(2)+'</div><div class="stat-sub">'+fmt(lU)+' units ~ '+fmt(lP)+' KENP</div></div>'+
+    '<div class="stat"><div class="stat-lbl">KU Pages</div><div class="stat-val">'+fmt(lP)+'</div><div class="stat-sub">last 30 days</div></div>'+
+    '<div class="stat"><div class="stat-lbl">Avg/Unit</div><div class="stat-value">$'+(lU>0?(lR/lU).toFixed(2):'0.00')+'</div><div class="stat-sub">per sale</div></div>'+
+    '<div class="stat"><div class="stat-lbl">All Time</div><div class="stat-val">$'+allR.toFixed(2)+'</div><div class="stat-sub">'+fmt(allU)+' units ~ '+fmt(allP)+' KENP</div></div>';
+  
+  // Top books: sort by 30-day royalties (estimate from book data)
+  var sorted=[...books].sort((a,b)=>(b.royalties||0)-(a.royalties||0));
+  document.getElementById('topBooks').innerHTML=sorted.length?sorted.slice(0,20).map((b,i)=>bookHTML(b,i+1)).join(''):'<div class="empty-state">Import KDP reports to start</div>';
+  
+  // Pie chart: top 5 books + Other
+  var top5=sorted.slice(0,5),otherR=sorted.slice(5).reduce((s,b)=>s+(b.royalties||0),0);
+  var pieData=top5.map(b=>({label:b.title,value:b.royalties||0,asin:b.asin})).concat(otherR>0?[{label:'Other',value:otherR}]:[]);
+  renderPie(pieData);
+  
+  // Bar chart: last 14 days
+  renderBar(days.slice(-14));
 }
 
 function bookHTML(b,r){
@@ -413,30 +253,61 @@ function bookHTML(b,r){
   return '<a href="'+link+'" target="_blank" class="book-item"><span class="book-rank">'+r+'</span><img class="book-cover" src="'+img+'" alt="" loading="lazy" onerror="this.style.display=\'none\'"><div class="book-info"><div class="book-title">'+esc(b.title)+'</div><div class="book-meta">'+fmt(b.units||0)+' units ~ '+fmt(b.pageReads||0)+' KENP'+(b.asin?' ~ '+b.asin:'')+'</div></div><div class="book-stats"><div class="book-earnings">$'+(b.royalties||0).toFixed(2)+'</div><div class="book-units">'+(b.units||0)+' sold</div></div></a>';
 }
 
+function renderPie(data){
+  var c=document.getElementById('pieChart');if(!c||!data.length)return;
+  var ctx=c.getContext('2d'),rect=c.parentElement.getBoundingClientRect(),dpr=window.devicePixelRatio||1;
+  c.width=rect.width*dpr;c.height=rect.height*dpr;c.style.width=rect.width+'px';c.style.height=rect.height+'px';
+  ctx.scale(dpr,dpr);ctx.clearRect(0,0,rect.width,rect.height);
+  var cx=rect.width/2,cy=rect.height/2-10,r=Math.min(cx,cy)-20,total=data.reduce((s,d)=>s+d.value,0);
+  if(!total)return;
+  var colors=['#4299e1','#48bb78','#ed8936','#9f7aea','#fc8181','#a0aec0'];
+  var start=-Math.PI/2;
+  data.forEach((d,i)=>{
+    var slice=(d.value/total)*2*Math.PI;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,start,start+slice);ctx.closePath();
+    ctx.fillStyle=colors[i%colors.length];ctx.fill();
+    ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();
+    // Label
+    var mid=start+slice/2;
+    var lx=cx+Math.cos(mid)*(r+12),ly=cy+Math.sin(mid)*(r+14);
+    if(slice>0.15){ctx.fillStyle='#fff';ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.fillText('$'+d.value.toFixed(0),cx+Math.cos(mid)*r*0.6,cy+Math.sin(mid)*r*0.6+3)}
+    ctx.fillStyle='#4a5568';ctx.font='9px sans-serif';ctx.textAlign=lx<cx?'right':'left';
+    ctx.fillText(d.label.slice(0,15)+(d.label.length>15?'...':''),lx,ly);
+    start+=slice;
+  });
+  ctx.fillStyle='#718096';ctx.font='10px sans-serif';ctx.textAlign='center';ctx.fillText('Top 5 Books by Revenue',cx,rect.height-4);
+}
+
+function renderBar(data){
+  var c=document.getElementById('barChart');if(!c||!data||data.length<2)return;
+  var ctx=c.getContext('2d'),rect=c.parentElement.getBoundingClientRect(),dpr=window.devicePixelRatio||1;
+  c.width=rect.width*dpr;c.height=rect.height*dpr;c.style.width=rect.width+'px';c.style.height=rect.height+'px';
+  ctx.scale(dpr,dpr);ctx.clearRect(0,0,rect.width,rect.height);
+  var sorted=[...data].sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  var w=rect.width,h=rect.height,pad={t:15,b:25,l:50,r:10},cw=w-pad.l-pad.r,ch=h-pad.t-pad.b;
+  var vals=sorted.map(d=>d.royalties||0),max=Math.max(...vals,1)*1.2;
+  ctx.fillStyle='#a0aec0';ctx.font='9px sans-serif';ctx.textAlign='right';
+  for(var i=0;i<=4;i++){var y=pad.t+ch-(ch*i/4);ctx.fillText('$'+(max*i/4).toFixed(0),pad.l-4,y+3);ctx.strokeStyle='#edf2f7';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke()}
+  var gap=cw/sorted.length;
+  sorted.forEach((d,i)=>{
+    var x=pad.l+gap*i+2,bw=Math.max(gap-4,2),bh=(vals[i]/max)*ch,y=pad.t+ch-bh;
+    var grad=ctx.createLinearGradient(0,y,0,pad.t+ch);grad.addColorStop(0,'#4299e1');grad.addColorStop(1,'#bee3f8');
+    ctx.fillStyle=grad;ctx.beginPath();ctx.roundRect?ctx.roundRect(x,y,bw,bh,[2,2,0,0]):ctx.rect(x,y,bw,bh);ctx.fill();
+    ctx.fillStyle='#a0aec0';ctx.font='8px sans-serif';ctx.textAlign='center';
+    var lbl=(()=>{try{return new Date(d.date).toLocaleDateString('en-US',{month:'short',day:'numeric'})}catch{return d.date||''}})();
+    ctx.save();ctx.translate(x+bw/2,pad.t+ch+14);ctx.rotate(-0.5);ctx.fillText(lbl,0,0);ctx.restore();
+  });
+}
+
 function renderHist(){
   var tR=days.reduce((s,d)=>s+(d.royalties||0),0),tU=days.reduce((s,d)=>s+(d.units||0),0),tP=days.reduce((s,d)=>s+(d.pageReads||0),0);
   document.getElementById('histStats').innerHTML=
-    '<div class="stat-card"><div class="stat-label">Total Royalties</div><div class="stat-value">$'+tR.toFixed(2)+'</div></div>'+
-    '<div class="stat-card"><div class="stat-label">Total Units</div><div class="stat-value">'+fmt(tU)+'</div></div>'+
-    '<div class="stat-card"><div class="stat-label">Total KENP</div><div class="stat-value">'+fmt(tP)+'</div></div>'+
-    '<div class="stat-card"><div class="stat-label">'+(raw.isMonthly?'Months':'Days')+' Tracked</div><div class="stat-value">'+days.length+'</div></div>';
+    '<div class="stat"><div class="stat-lbl">Total</div><div class="stat-val">$'+tR.toFixed(2)+'</div></div>'+
+    '<div class="stat"><div class="stat-lbl">Units</div><div class="stat-val">'+fmt(tU)+'</div></div>'+
+    '<div class="stat"><div class="stat-lbl">KENP</div><div class="stat-val">'+fmt(tP)+'</div></div>'+
+    '<div class="stat"><div class="stat-lbl">Days</div><div class="stat-val">'+days.length+'</div></div>';
   var sorted=[...days].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-  document.getElementById('historyBody').innerHTML=sorted.length?sorted.map(d=>'<tr><td>'+(raw.isMonthly?d.date:fmtD(d.date))+'</td><td><strong>$'+(d.royalties||0).toFixed(2)+'</strong></td><td>'+(d.units||0)+'</td><td>'+(d.pageReads||0).toLocaleString()+'</td><td>$'+((d.units||1)>0?((d.royalties||0)/(d.units||1)).toFixed(2):'0.00')+'</td></tr>').join(''):'<tr><td colspan="5" class="empty-state">No data</td></tr>';
-  renderChart(document.getElementById('histChart'),days,'#48bb78',raw.isMonthly);
-}
-
-function renderSeries(){
-  var map=new Map();
-  books.forEach(b=>{
-    var s=(b.title||'').match(/^(.+?)\s*[#:]\s*(?:\d+|[Vv]ol\.?\s*\d+)/);
-    var n=s?s[1].trim():'Uncategorized';
-    var e=map.get(n)||{name:n,royalties:0,units:0,pageReads:0,count:0};
-    e.royalties+=b.royalties||0;e.units+=b.units||0;e.pageReads+=b.pageReads||0;e.count++;
-    map.set(n,e);
-  });
-  if(map.size<=1){document.getElementById('seriesList').innerHTML='<div class="empty-state">Series are inferred from book titles (e.g. "Series Name: Book 1")</div>';return}
-  var arr=Array.from(map.values()).sort((a,b)=>(b.royalties||0)-(a.royalties||0));
-  document.getElementById('seriesList').innerHTML=arr.map(s=>'<div class="series-item"><div><div class="series-name">'+esc(s.name)+'</div><div class="series-meta">'+s.count+' books ~ '+fmt(s.units)+' units ~ '+fmt(s.pageReads)+' KENP</div></div><div class="series-earnings">$'+(s.royalties||0).toFixed(2)+'</div></div>').join('');
+  document.getElementById('historyBody').innerHTML=sorted.length?sorted.map(d=>'<tr><td>'+fmtD(d.date)+'</td><td><strong>$'+(d.royalties||0).toFixed(2)+'</strong></td><td>'+(d.units||0)+'</td><td>'+(d.pageReads||0).toLocaleString()+'</td><td>$'+((d.units||1)>0?((d.royalties||0)/(d.units||1)).toFixed(2):'0.00')+'</td></tr>').join(''):'<tr><td colspan="5" class="empty-state">No data</td></tr>';
 }
 
 function renderBooks(){
@@ -447,64 +318,19 @@ function renderBooks(){
   else if(sort==='units')list.sort((a,b)=>(b.units||0)-(a.units||0));
   else if(sort==='title')list.sort((a,b)=>(a.title||'').localeCompare(b.title||''));
   document.getElementById('allBooks').innerHTML=list.length?list.map((b,i)=>bookHTML(b,i+1)).join(''):'<div class="empty-state">No books match</div>';
-}
-
-function renderSets(){
-  document.getElementById('sUpdated').textContent=raw.lastUpdated?new Date(raw.lastUpdated).toLocaleString():'Never';
+  document.getElementById('sInfo').textContent=days.length+' days, '+books.length+' books';
   document.getElementById('sBooks').textContent=books.length;
   document.getElementById('sDays').textContent=days.length;
-  document.getElementById('sTotal').textContent='$'+days.reduce((s,d)=>s+(d.royalties||0),0).toFixed(2);
-  document.getElementById('sKENP').textContent=fmt(days.reduce((s,d)=>s+(d.pageReads||0),0));
-  document.getElementById('sLastDays').textContent=days.length?days.slice(-5).map(d=>d.date+' $'+d.royalties.toFixed(2)).join(', '):'-';
-  document.getElementById('sType').textContent=raw.isMonthly?'Monthly summary ('+days.length+' months)':'Daily data ('+days.length+' days)';
-}
-
-function renderChart(canvas,data,color,isMonthly){
-  if(!canvas||!data||data.length<2)return;
-  var ctx=canvas.getContext('2d'),rect=canvas.parentElement.getBoundingClientRect(),dpr=window.devicePixelRatio||1;
-  canvas.width=rect.width*dpr;canvas.height=rect.height*dpr;canvas.style.width=rect.width+'px';canvas.style.height=rect.height+'px';
-  ctx.scale(dpr,dpr);ctx.clearRect(0,0,rect.width,rect.height);
-  var sorted=[...data].sort((a,b)=>(a.date||'').localeCompare(b.date||'')),w=rect.width,h=rect.height,pad={t:15,b:25,l:55,r:15},cw=w-pad.l-pad.r,ch=h-pad.t-pad.b;
-  if(sorted.length<2){ctx.fillStyle='#718096';ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText('Not enough data',w/2,h/2);return}
-  var vals=sorted.map(d=>d.royalties||0),max=Math.max(...vals,1)*1.1;
-  ctx.fillStyle='#718096';ctx.font='10px sans-serif';ctx.textAlign='right';
-  for(var i=0;i<=4;i++){var v=(max*i)/4,y=pad.t+ch-(ch*i)/4;ctx.fillText('$'+v.toFixed(2),pad.l-6,y+3);ctx.strokeStyle='#edf2f7';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke()}
-  var gap=cw/(sorted.length-1);ctx.strokeStyle=color;ctx.lineWidth=2;ctx.beginPath();
-  sorted.forEach((d,i)=>{var x=pad.l+gap*i,y=pad.t+ch-(vals[i]/max)*ch;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y)});
-  ctx.stroke();
-  ctx.lineTo(pad.l+gap*(sorted.length-1),pad.t+ch);ctx.lineTo(pad.l,pad.t+ch);ctx.closePath();
-  ctx.fillStyle=color.replace('#','rgba(')+',0.1)'.replace('rgba(4','rgba(4');try{ctx.fill()}catch(e){}
-  sorted.forEach((d,i)=>{var x=pad.l+gap*i,y=pad.t+ch-(vals[i]/max)*ch;ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,3,0,2*Math.PI);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x,y,1.5,0,2*Math.PI);ctx.fill()});
-  ctx.fillStyle='#718096';ctx.font='10px sans-serif';ctx.textAlign='center';
-  sorted.forEach((d,i)=>{ctx.fillText((()=>{try{return new Date(d.date).toLocaleDateString('en-US',{month:'short',day:'numeric'})}catch{return d.date||''}})(),pad.l+gap*i,pad.t+ch+16)});
-}
-
-function renderAds(){
-  var totalSpend=adsData.reduce((s,a)=>s+a.spend,0),totalSales=adsData.reduce((s,a)=>s+a.sales,0);
-  var totalPur=adsData.reduce((s,a)=>s+(a.purchases||0),0),totalImp=adsData.reduce((s,a)=>s+(a.impressions||0),0);
-  document.getElementById('adsStats').innerHTML=
-    '<div class="stat-card"><div class="stat-label">Total Ad Spend</div><div class="stat-value">$'+totalSpend.toFixed(2)+'</div></div>'+
-    '<div class="stat-card"><div class="stat-label">Total Ad Sales</div><div class="stat-value">$'+totalSales.toFixed(2)+'</div></div>'+
-    '<div class="stat-card"><div class="stat-label">Overall ACOS</div><div class="stat-value">'+(totalSpend>0?(totalSpend/totalSales*100).toFixed(1):'0.0')+'%</div></div>'+
-    '<div class="stat-card"><div class="stat-label">ROAS</div><div class="stat-value">'+(totalSpend>0?(totalSales/totalSpend).toFixed(2):'0.00')+'x</div></div>'+
-    '<div class="stat-card"><div class="stat-label">Purchases</div><div class="stat-value">'+totalPur+'</div></div>'+
-    '<div class="stat-card"><div class="stat-label">Impressions</div><div class="stat-value">'+fmt(totalImp)+'</div></div>';
-  var sorted=[...adsData].sort((a,b)=>b.spend-a.spend);
-  document.getElementById('adsBody').innerHTML=sorted.length?sorted.map(a=>{
-    var acosPct=a.spend>0?((a.spend/a.sales)*100).toFixed(1):'0.0';
-    var roas=a.spend>0?(a.sales/a.spend).toFixed(2):'0.00';
-    return '<tr><td><strong>'+esc(a.name)+'</strong></td><td>$'+a.spend.toFixed(2)+'</td><td>$'+a.sales.toFixed(2)+'</td><td>'+acosPct+'%</td><td>'+(a.purchases||0)+'</td><td>'+(a.impressions||0).toLocaleString()+'</td><td>'+(a.clicks||0)+'</td><td>'+(a.ctr?(a.ctr*100).toFixed(2)+'%':'-')+'</td><td>$'+(a.cpc||0).toFixed(2)+'</td></tr>';
-  }).join(''):'<tr><td colspan="9" class="empty-state">Drop your Amazon Ads CSV in Settings to see campaign data</td></tr>';
 }
 
 function doExport(){
-  var b=new Blob([JSON.stringify({...raw,adsData},null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');
+  var b=new Blob([JSON.stringify(raw,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');
   a.href=u;a.download='tomos-'+new Date().toISOString().split('T')[0]+'.json';a.click();URL.revokeObjectURL(u);n('Exported');
 }
 
 function doClear(){
   if(!confirm('Delete all data?'))return;
-  books=[];days=[];raw={};adsData=[];localStorage.removeItem(KEY);renderToday();n('Cleared');
+  books=[];days=[];raw={};localStorage.removeItem(KEY);renderToday();n('Cleared');
 }
 
 function fmt(n){if(n==null||isNaN(n))return'0';if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return n.toLocaleString()}
