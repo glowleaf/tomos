@@ -5,9 +5,9 @@ let dailyHistory = [];
 
 document.addEventListener('DOMContentLoaded', () => {
   loadData().then(() => {
-    setupTabs();
-    setupActions();
-    setupDropZone();
+    try { setupTabs(); } catch(e) { console.error('Tomos tabs:', e); }
+    try { setupActions(); } catch(e) { console.error('Tomos actions:', e); }
+    try { setupDropZone(); } catch(e) { console.error('Tomos dropzone:', e); }
   });
 });
 
@@ -508,7 +508,7 @@ function setupActions() {
   document.getElementById('exportBtn').addEventListener('click', doExport);
   document.getElementById('exportDataBtn').addEventListener('click', doExport);
   document.getElementById('clearDataBtn').addEventListener('click', doClear);
-  document.getElementById('importDataBtn').addEventListener('click', () => document.querySelector('.file-input').click());
+
   document.getElementById('copyDebugInfo').addEventListener('click', () => {
     navigator.clipboard.writeText(JSON.stringify(data, null, 2));
     showNotification('Debug info copied');
