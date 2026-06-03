@@ -138,8 +138,9 @@ tr:last-child td{border-bottom:none}
       <button id="adsLifetime" class="btn">Lifetime</button>
     </div>
     <div class="stats" id="adsStats"></div>
+    <div class="stats" id="adsCompare" style="margin-top:-8px"></div>
     <div class="sectionHeader"><h3>Campaigns</h3></div>
-    <div class="table-wrap"><table><thead><tr><th>Campaign</th><th>Spend</th><th>Sales</th><th>ACOS</th><th>Purchases</th></tr></thead>
+    <div class="table-wrap"><table><thead><tr><th>Campaign</th><th>Spend</th><th>Sales</th><th>ROAS</th><th>Profit</th><th>Purchases</th></tr></thead>
     <tbody id="adsBody"></tbody></table></div>
   </div>
 
@@ -259,25 +260,42 @@ function renderHistory(period){
   renderBarCustom(document.getElementById('histBar'),entries.slice(-14));
 }
 function renderAds(period){
-  // Filter by start date: show campaigns that started in the selected period
   var cutoff = period==='30' ? Date.now() - 30*86400000 : 0;
   var filtered = adsData.filter(a => {
-    if (!cutoff || !a.startDate) return true; // no filtering for lifetime or missing dates
-    // Parse MM/DD/YYYY or similar
+    if (!cutoff || !a.startDate) return true;
     var parts = a.startDate.match(/(\d+)\D(\d+)\D(\d+)/);
     if (!parts) return true;
     var d = new Date(parts[3], parts[1]-1, parts[2]);
     return d.getTime() >= cutoff;
   });
-  if (period==='30' && filtered.length === 0) filtered = adsData; // fallback to all if filter returns nothing
+  if (period==='30' && filtered.length === 0) filtered = adsData;
   var totalSpend=filtered.reduce((s,a)=>s+a.spend,0),totalSales=filtered.reduce((s,a)=>s+a.sales,0);
+  var profit=totalSales-totalSpend,roas=totalSpend>0?(totalSales/totalSpend):0;
   document.getElementById('adsStats').innerHTML=
     '<div class="stat"><div class="stat-lbl">Ad Spend</div><div class="stat-val">$'+totalSpend.toFixed(2)+'</div></div>'+
     '<div class="stat"><div class="stat-lbl">Ad Sales</div><div class="stat-val">$'+totalSales.toFixed(2)+'</div></div>'+
+    '<div class="stat"><div class="stat-lbl">ROAS</div><div class="stat-val">'+roas.toFixed(2)+'x</div></div>'+
+    '<div class="stat"><div class="stat-lbl">Net Profit</div><div class="stat-val" style="color:'+(profit>=0?'#48bb78':'#e53e3e')+'">$'+profit.toFixed(2)+'</div></div>'+
     '<div class="stat"><div class="stat-lbl">ACOS</div><div class="stat-val">'+(totalSpend>0?(totalSpend/totalSales*100).toFixed(1):'0')+'%</div></div>'+
-    '<div class="stat"><div class="stat-lbl">ROAS</div><div class="stat-val">'+(totalSpend>0?(totalSales/totalSpend).toFixed(2):'0')+'x</div></div>';
+    '<div class="stat"><div class="stat-lbl">Purchases</div><div class="stat-val">'+filtered.reduce((s,a)=>s+(a.purchases||0),0)+'</div></div>';
+  // Compare with book sales for same period
+  var bookSales30=0;
+  try{
+    var allD=days.map(d=>d.date).filter(d=>d).sort(),latest=allD[allD.length-1];
+    if(latest){
+      var cut=getCutoff(latest),cutM=cut.slice(0,7);
+      var entries=days.filter(d=>d.date>=(d.date.length<=7?cutM:cut));
+      bookSales30=entries.reduce((s,d)=>s+(d.royalties||0),0);
+    }
+  }catch(e){}
+  document.getElementById('adsCompare').innerHTML=period==='30'?
+    '<div class="stat" style="background:#ebf8ff;border-color:#bee3f8"><div class="stat-lbl">Book Sales (30d)</div><div class="stat-val">$'+bookSales30.toFixed(2)+'</div><div class="stat-sub">Ad spend vs book sales: '+(totalSpend>0?(totalSpend/bookSales30*100).toFixed(1):'0')+'%</div></div>'+
+    '<div class="stat" style="background:#ebf8ff;border-color:#bee3f8"><div class="stat-lbl">Combined (Ads+Books)</div><div class="stat-val">$'+(bookSales30+totalSales).toFixed(2)+'</div><div class="stat-sub">Total revenue from all sources</div></div>':'';
   var sorted=[...filtered].sort((a,b)=>b.spend-a.spend);
-  document.getElementById('adsBody').innerHTML=sorted.length?sorted.map(a=>'<tr><td><strong>'+esc(a.name)+'</strong></td><td>$'+a.spend.toFixed(2)+'</td><td>$'+a.sales.toFixed(2)+'</td><td>'+(a.spend>0?(a.spend/a.sales*100).toFixed(1):'0')+'%</td><td>'+(a.purchases||0)+'</td></tr>').join(''):'<tr><td colspan="5" class="empty-state">Drop Amazon Ads CSV in Import tab</td></tr>';
+  document.getElementById('adsBody').innerHTML=sorted.length?sorted.map(a=>{
+    var r=a.spend>0?(a.sales/a.spend):0,p=a.sales-a.spend;
+    return '<tr><td><strong>'+esc(a.name)+'</strong></td><td>$'+a.spend.toFixed(2)+'</td><td>$'+a.sales.toFixed(2)+'</td><td>'+r.toFixed(2)+'x</td><td style="color:'+(p>=0?'#48bb78':'#e53e3e')+'">$'+p.toFixed(2)+'</td><td>'+(a.purchases||0)+'</td></tr>';
+  }).join(''):'<tr><td colspan="6" class="empty-state">Drop Amazon Ads CSV in Import tab</td></tr>';
 }
 function setupDrop(){
   var dz=document.getElementById('dropZone'),fi=document.getElementById('fileInput');
