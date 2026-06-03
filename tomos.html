@@ -183,6 +183,7 @@ tr:last-child td{border-bottom:none}
     </div>
   </div>
 </div>
+<div style="text-align:center;font-size:11px;color:#a0aec0;padding:8px 0 20px">Tomos Book Sales v1.0.0</div>
 <div id="notif"></div>
 
 <script>
@@ -258,7 +259,7 @@ function renderHistory(period){
   document.getElementById('histStats').innerHTML=
     '<div class="stat"><div class="stat-lbl">'+(is30?'Today':'Latest')+'</div><div class="stat-val">'+(today?'$'+today.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(today?today.units+' units':'')+'</div></div>'+
     '<div class="stat"><div class="stat-lbl">'+(is30?'Yesterday':'Previous')+'</div><div class="stat-val">'+(yest?'$'+yest.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(yest?yest.units+' units':'')+'</div></div>'+
-    '<div class="stat"><div class="stat-lbl">'+(is30?'Last 30 Days':'Lifetime')+'</div><div class="stat-val">$'+lR.toFixed(2)+'</div><div class="stat-sub">'+fmt(lU)+' units ~ '+fmt(lP)+' KENP</div></div>'+
+    '<div class="stat"><div class="stat-lbl">'+(is30?'Last 30 Days':'Lifetime')+'</div><div class="stat-val">$'+lR.toFixed(2)+'</div><div class="stat-sub">'+fmt(lU)+' units ~ '+fmt(lP)+' KENP ('+kenp$(lP)+')</div></div>'+
     '<div class="stat"><div class="stat-lbl">KU Pages</div><div class="stat-val">'+fmt(lP)+'</div><div class="stat-sub"></div></div>'+
     '<div class="stat"><div class="stat-lbl">Avg/Unit</div><div class="stat-val">$'+(lU>0?(lR/lU).toFixed(2):'0.00')+'</div><div class="stat-sub">per sale</div></div>'+
     '<div class="stat"><div class="stat-lbl">Entries</div><div class="stat-val">'+entries.length+'</div><div class="stat-sub">'+(is30?'days':'months/days')+'</div></div>';
@@ -481,10 +482,10 @@ function renderToday(){
   document.getElementById('stats').innerHTML=
     '<div class="stat"><div class="stat-lbl">'+(hasMonthly?'Latest Month':'Today')+'</div><div class="stat-val">'+(today?'$'+today.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(today?today.units+' units':'')+'</div></div>'+
     '<div class="stat"><div class="stat-lbl">'+(hasMonthly?'Prev Month':'Yesterday')+'</div><div class="stat-val">'+(yest?'$'+yest.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(yest?yest.units+' units':'')+'</div></div>'+
-    '<div class="stat"><div class="stat-lbl">'+(hasMonthly?'This Month (~30 days)':'Last 30 Days')+'</div><div class="stat-val">$'+lR.toFixed(2)+'</div><div class="stat-sub">'+fmt(lU)+' units ~ '+fmt(lP)+' KENP</div></div>'+
-    '<div class="stat"><div class="stat-lbl">KU Pages</div><div class="stat-val">'+fmt(lP)+'</div><div class="stat-sub"></div></div>'+
+    '<div class="stat"><div class="stat-lbl">'+(hasMonthly?'This Month (~30 days)':'Last 30 Days')+'</div><div class="stat-val">$'+lR.toFixed(2)+'</div><div class="stat-sub">'+fmt(lU)+' units ~ '+fmt(lP)+' KENP ('+kenp$(lP)+')</div></div>'+
+    '<div class="stat"><div class="stat-lbl">KU Pages</div><div class="stat-val">'+fmt(lP)+'</div><div class="stat-sub">'+kenp$(lP)+'</div></div>'+
     '<div class="stat"><div class="stat-lbl">Avg/Unit</div><div class="stat-val">$'+(lU>0?(lR/lU).toFixed(2):'0.00')+'</div><div class="stat-sub">per sale</div></div>'+
-    '<div class="stat"><div class="stat-lbl">All Time</div><div class="stat-val">$'+allR.toFixed(2)+'</div><div class="stat-sub">'+fmt(allU)+' units ~ '+fmt(allP)+' KENP</div></div>';
+    '<div class="stat"><div class="stat-lbl">All Time</div><div class="stat-val">$'+allR.toFixed(2)+'</div><div class="stat-sub">'+fmt(allU)+' units ~ '+fmt(allP)+' KENP ('+kenp$(allP)+')</div></div>';
   
   // Top books: use 30-day calculated data if available
   var topBooks=raw.top30Books&&raw.top30Books.length?raw.top30Books:[...books].sort((a,b)=>(b.royalties||0)-(a.royalties||0));
@@ -502,7 +503,7 @@ function renderToday(){
 function bookHTML(b,r){
   var img=b.asin?'https://images-na.ssl-images-amazon.com/images/P/'+b.asin+'.01._SX200_SCLZZZZZZZ_.jpg':'';
   var link=b.asin?'https://www.amazon.com/dp/'+b.asin:'#';
-  return '<a href="'+link+'" target="_blank" class="book-item"><span class="book-rank">'+r+'</span><img class="book-cover" src="'+img+'" alt="" loading="lazy" onerror="this.style.display=\'none\'"><div class="book-info"><div class="book-title">'+esc(b.title)+'</div><div class="book-meta">'+fmt(b.units||0)+' units ~ '+fmt(b.pageReads||0)+' KENP'+(b.asin?' ~ '+b.asin:'')+'</div></div><div class="book-stats"><div class="book-earnings">$'+(b.royalties||0).toFixed(2)+'</div><div class="book-units">'+(b.units||0)+' sold</div></div></a>';
+  return '<a href="'+link+'" target="_blank" class="book-item"><span class="book-rank">'+r+'</span><img class="book-cover" src="'+img+'" alt="" loading="lazy" onerror="this.style.display=\'none\'"><div class="book-info"><div class="book-title">'+esc(b.title)+'</div><div class="book-meta">'+fmt(b.units||0)+' units ~ '+fmt(b.pageReads||0)+' KENP ('+kenp$(b.pageReads)+')'+(b.asin?' ~ '+b.asin:'')+'</div></div><div class="book-stats"><div class="book-earnings">$'+(b.royalties||0).toFixed(2)+'</div><div class="book-units">'+(b.units||0)+' sold</div></div></a>';
 }
 
 function renderPie(data){
@@ -563,7 +564,7 @@ function renderHist(){
   document.getElementById('histStats').innerHTML=
     '<div class="stat"><div class="stat-lbl">Total</div><div class="stat-val">$'+tR.toFixed(2)+'</div></div>'+
     '<div class="stat"><div class="stat-lbl">Units</div><div class="stat-val">'+fmt(tU)+'</div></div>'+
-    '<div class="stat"><div class="stat-lbl">KENP</div><div class="stat-val">'+fmt(tP)+'</div></div>'+
+    '<div class="stat"><div class="stat-lbl">KENP</div><div class="stat-val">'+fmt(tP)+' ('+kenp$(tP)+')</div></div>'+
     '<div class="stat"><div class="stat-lbl">Days</div><div class="stat-val">'+days.length+'</div></div>';
   var sorted=[...days].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   document.getElementById('historyBody').innerHTML=sorted.length?sorted.map(d=>'<tr><td>'+fmtD(d.date)+'</td><td><strong>$'+(d.royalties||0).toFixed(2)+'</strong></td><td>'+(d.units||0)+'</td><td>'+(d.pageReads||0).toLocaleString()+'</td><td>$'+((d.units||1)>0?((d.royalties||0)/(d.units||1)).toFixed(2):'0.00')+'</td></tr>').join(''):'<tr><td colspan="5" class="empty-state">No data</td></tr>';
@@ -593,6 +594,7 @@ function doClear(){
 }
 
 function fmt(n){if(n==null||isNaN(n))return'0';if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return n.toLocaleString()}
+function kenp$(p){return '$'+(p*0.0045).toFixed(2)}
 function fmtD(d){if(!d)return'';try{return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}catch{return d}}
 function esc(s){if(!s)return'';var d=document.createElement('div');d.textContent=s;return d.innerHTML}
 function n(m){var e=document.getElementById('notif');e.textContent=m;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),2500)}
