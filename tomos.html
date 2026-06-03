@@ -325,10 +325,36 @@ async function importXLSX(file){
   try{
     var p=new KDPXLSXParser(),r=await p.parseFromFile(file),a=p.toAppData(r);
     if(!a.books||!a.books.length){n('No data in '+file.name);return}
-    // Check for date format conflict
+    // Auto-convert date format to match incoming data
     if(a.isMonthly!==undefined&&raw.isMonthly!==undefined&&raw.dailyHistory&&raw.dailyHistory.length>0&&a.isMonthly!==raw.isMonthly){
-      if(!confirm('This file has '+(a.isMonthly?'monthly':'daily')+' dates but existing data is '+(raw.isMonthly?'monthly':'daily')+'. Clear existing data and import fresh?')){n('Import cancelled');return}
-      books=[];days=[];raw={};adsData=[];
+      if(a.isMonthly){
+        // Incoming is monthly: aggregate existing daily data into months
+        var monthly={};
+        days.forEach(d=>{
+          var m=d.date.slice(0,7);
+          if(!monthly[m])monthly[m]={date:m,royalties:0,units:0,pageReads:0};
+          monthly[m].royalties+=d.royalties||0;
+          monthly[m].units+=d.units||0;
+          monthly[m].pageReads+=d.pageReads||0;
+        });
+        days=Object.values(monthly).sort((x,y)=>x.date.localeCompare(y.date));
+      }else{
+        // Incoming is daily: expand existing monthly data (spread evenly across ~30 days)
+        var expanded=[];
+        days.forEach(d=>{
+          if(d.date.length<=7){
+            // Monthly entry: spread across 30 days
+            var dd=new Date(d.date+'-01'),end=new Date(dd.getFullYear(),dd.getMonth()+1,0),numDays=end.getDate();
+            for(var day=1;day<=numDays;day++){
+              var ds=d.date+'-'+String(day).padStart(2,'0');
+              var factor=1/numDays;
+              expanded.push({date:ds,royalties:(d.royalties||0)*factor,units:(d.units||0)*factor,pageReads:(d.pageReads||0)*factor});
+            }
+          }else expanded.push({...d});
+        });
+        days=expanded.sort((x,y)=>x.date.localeCompare(y.date));
+      }
+      raw.isMonthly=a.isMonthly;
     }
     merge(a);save();renderToday();n('Imported '+a.books.length+' books');
   }catch(e){n('Error: '+e.message)}
