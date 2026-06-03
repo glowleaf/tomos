@@ -42,4 +42,4 @@ Or upload to any static host (Netlify, GitHub Pages, S3, etc.) — no backend ne
 
 ## Version
 
-v1.0.0
+v1.1.0
