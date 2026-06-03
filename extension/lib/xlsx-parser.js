@@ -43,20 +43,10 @@ export class KDPXLSXParser {
     rows.slice(1).forEach(row => {
       if (!row[0]) return;
       const month = {
-        date: row[0],
-        paidEbooks: parseFloat(row[1]) || 0,
-        freeEbooks: parseFloat(row[2]) || 0,
-        paperbacks: parseFloat(row[3]) || 0,
-        hardcovers: parseFloat(row[4]) || 0,
-        audiobooks: parseFloat(row[5]) || 0,
-        kollBorrows: row[6],
-        kenp: parseFloat(row[7]) || 0,
-        royaltyUSD: parseFloat(row[8]) || 0,
-        royaltyGBP: parseFloat(row[9]) || 0,
-        royaltyEUR: parseFloat(row[10]) || 0,
-        royaltyJPY: parseFloat(row[11]) || 0,
-        royaltyCAD: parseFloat(row[12]) || 0,
-        royaltyINR: parseFloat(row[13]) || 0
+        date: row[0], paidEbooks: parseFloat(row[1]) || 0, freeEbooks: parseFloat(row[2]) || 0,
+        paperbacks: parseFloat(row[3]) || 0, hardcovers: parseFloat(row[4]) || 0, audiobooks: parseFloat(row[5]) || 0,
+        kenp: parseFloat(row[7]) || 0, royaltyUSD: parseFloat(row[8]) || 0, royaltyGBP: parseFloat(row[9]) || 0,
+        royaltyEUR: parseFloat(row[10]) || 0
       };
       month.totalUnits = month.paidEbooks + month.freeEbooks + month.paperbacks + month.hardcovers + month.audiobooks;
       month.royaltyTotal = month.royaltyUSD + month.royaltyGBP + month.royaltyEUR;
@@ -72,32 +62,13 @@ export class KDPXLSXParser {
     if (rows.length < 2) return [];
     const sales = {};
     rows.slice(1).forEach(row => {
-      if (!row[0]) return;
-      const asin = row[3] || 'unknown';
-      const date = row[0];
-      const unitsSold = parseFloat(row[7]) || 0;
-      const unitsRefunded = parseFloat(row[8]) || 0;
-      const netUnits = parseFloat(row[9]) || 0;
-      const royalty = parseFloat(row[13]) || 0;
-      const title = row[1] || 'Unknown';
-      const marketplace = row[4] || '';
-      const currency = row[14] || '';
-
-      const key = `${asin}_${date}`;
-      if (!sales[key]) {
-        sales[key] = {
-          asin, title, date, marketplace, currency,
-          unitsSold: 0, unitsRefunded: 0, netUnits: 0, royalty: 0,
-          transactions: []
-        };
-      }
-      sales[key].unitsSold += unitsSold;
-      sales[key].unitsRefunded += unitsRefunded;
-      sales[key].netUnits += netUnits;
-      sales[key].royalty += royalty;
-      sales[key].transactions.push({
-        type: row[5], transactionType: row[6], unitsSold, unitsRefunded, netUnits, royalty, currency
-      });
+      if (!row[3]) return;
+      const key = `${row[3]}_${String(row[0]).slice(0,10)}`;
+      if (!sales[key]) sales[key] = { asin: row[3], title: row[1]||'Unknown', date: String(row[0]).slice(0,10), marketplace: row[4]||'', currency: row[14]||'', unitsSold:0, unitsRefunded:0, netUnits:0, royalty:0 };
+      sales[key].unitsSold += parseFloat(row[7])||0;
+      sales[key].unitsRefunded += parseFloat(row[8])||0;
+      sales[key].netUnits += parseFloat(row[9])||0;
+      sales[key].royalty += parseFloat(row[13])||0;
     });
     return Object.values(sales);
   }
@@ -106,17 +77,11 @@ export class KDPXLSXParser {
     if (rows.length < 2) return [];
     const orders = {};
     rows.slice(1).forEach(row => {
-      if (!row[0]) return;
-      const key = `${row[3]}_${row[0]}`;
-      if (!orders[key]) {
-        orders[key] = {
-          date: row[0], title: row[1] || 'Unknown', author: row[2] || '',
-          asin: row[3] || '', marketplace: row[4] || '',
-          paidUnits: 0, freeUnits: 0
-        };
-      }
-      orders[key].paidUnits += parseFloat(row[5]) || 0;
-      orders[key].freeUnits += parseFloat(row[6]) || 0;
+      if (!row[3]) return;
+      const key = `${row[3]}_${String(row[0]).slice(0,10)}`;
+      if (!orders[key]) orders[key] = { date: String(row[0]).slice(0,10), title: row[1]||'Unknown', asin: row[3]||'', marketplace: row[4]||'', paidUnits:0, freeUnits:0 };
+      orders[key].paidUnits += parseFloat(row[5])||0;
+      orders[key].freeUnits += parseFloat(row[6])||0;
     });
     return Object.values(orders);
   }
@@ -125,145 +90,85 @@ export class KDPXLSXParser {
     if (rows.length < 2) return [];
     const kenpData = {};
     rows.slice(1).forEach(row => {
-      if (!row[0] || !row[7]) return;
-      const date = row[0];
-      const title = row[1] || 'Unknown';
-      const asin = row[3] || '';
-      const marketplace = row[6] || '';
-      const pages = parseFloat(row[7]) || 0;
-
-      const key = `${asin}_${date}_${marketplace}`;
-      if (!kenpData[key]) {
-        kenpData[key] = { date, title, asin, marketplace, pages: 0 };
-      }
-      kenpData[key].pages += pages;
+      if (!row[3] || !row[7]) return;
+      const key = `${row[3]}_${String(row[0]).slice(0,10)}`;
+      if (!kenpData[key]) kenpData[key] = { date: String(row[0]).slice(0,10), title: row[1]||'Unknown', asin: row[3]||'', marketplace: row[6]||'', pages:0 };
+      kenpData[key].pages += parseFloat(row[7])||0;
     });
     return Object.values(kenpData);
   }
 
   parseEbookRoyalty(rows) {
     if (rows.length < 2) return [];
-    return rows.slice(1).filter(r => r[0]).map(row => ({
-      date: row[0], title: row[1] || 'Unknown', author: row[2] || '',
-      asin: row[3] || '', marketplace: row[4] || '',
-      royaltyType: row[5] || '', transactionType: row[6] || '',
-      unitsSold: parseFloat(row[7]) || 0, unitsRefunded: parseFloat(row[8]) || 0,
-      netUnits: parseFloat(row[9]) || 0,
-      listPrice: parseFloat(row[10]) || 0, offerPrice: parseFloat(row[11]) || 0,
-      deliveryCost: row[12], royalty: parseFloat(row[14]) || 0, currency: row[15] || ''
+    return rows.slice(1).filter(r=>r[0]).map(row => ({
+      date: String(row[0]).slice(0,10), title: row[1]||'', asin: row[3]||'', marketplace: row[4]||'',
+      unitsSold: parseFloat(row[7])||0, netUnits: parseFloat(row[9])||0, royalty: parseFloat(row[14])||0, currency: row[15]||''
     }));
   }
 
   parseAudiobookRoyalty(rows) {
     if (rows.length < 2) return [];
-    return rows.slice(1).filter(r => r[0]).map(row => ({
-      date: row[0], title: row[1] || 'Unknown', author: row[2] || '',
-      asin: row[3] || '', marketplace: row[4] || '',
-      royaltyType: row[5] || '', transactionType: row[6] || '',
-      unitsSold: parseFloat(row[7]) || 0, unitsRefunded: parseFloat(row[8]) || 0,
-      netUnits: parseFloat(row[9]) || 0,
-      listPrice: parseFloat(row[10]) || 0, offerPrice: parseFloat(row[11]) || 0,
-      royalty: parseFloat(row[12]) || 0, currency: row[13] || ''
+    return rows.slice(1).filter(r=>r[0]).map(row => ({
+      date: String(row[0]).slice(0,10), title: row[1]||'', asin: row[3]||'', marketplace: row[4]||'',
+      unitsSold: parseFloat(row[7])||0, netUnits: parseFloat(row[9])||0, royalty: parseFloat(row[12])||0, currency: row[13]||''
     }));
   }
 
   toAppData(parsed) {
     const appData = { today: null, thisMonth: null, last30Days: null, dailyHistory: [], books: [], lastUpdated: new Date().toISOString() };
-
-    if (parsed['Summary']) {
-      const summary = this.parseSummary(parsed['Summary']);
-      if (summary && summary.months.length > 0) {
-        const latest = summary.months[0];
-        appData.thisMonth = {
-          date: latest.date, totalRoyalties: latest.royaltyTotal,
-          totalUnits: latest.totalUnits, totalPageReads: latest.kenp,
-          books: []
-        };
-      }
-    }
-
     const bookMap = new Map();
     const dailyMap = new Map();
 
-    if (parsed['Combined Sales']) {
-      const sales = this.parseCombinedSales(parsed['Combined Sales']);
-      sales.forEach(s => {
-        const asinKey = s.asin || s.title;
-        if (!bookMap.has(asinKey)) {
-          bookMap.set(asinKey, { asin: s.asin, title: s.title, royalties: 0, units: 0, pageReads: 0 });
-        }
-        const b = bookMap.get(asinKey);
-        b.royalties += s.royalty;
-        b.units += s.netUnits;
+    if (parsed['Summary']) {
+      const s = this.parseSummary(parsed['Summary']);
+      if (s && s.months.length > 0) {
+        const l = s.months[0];
+        appData.thisMonth = { date: l.date, totalRoyalties: l.royaltyTotal, totalUnits: l.totalUnits, totalPageReads: l.kenp, books: [] };
+      }
+    }
 
-        const dayKey = s.date;
-        if (!dailyMap.has(dayKey)) {
-          dailyMap.set(dayKey, { date: dayKey, royalties: 0, units: 0, pageReads: 0 });
+    if (parsed['Combined Sales']) {
+      this.parseCombinedSales(parsed['Combined Sales']).forEach(s => {
+        const k = s.asin || s.title;
+        if (!bookMap.has(k)) bookMap.set(k, { asin: s.asin, title: s.title, royalties:0, units:0, pageReads:0 });
+        const b = bookMap.get(k); b.royalties += s.royalty; b.units += s.netUnits;
+        if (s.date) {
+          if (!dailyMap.has(s.date)) dailyMap.set(s.date, { date: s.date, royalties:0, units:0, pageReads:0 });
+          const d = dailyMap.get(s.date); d.royalties += s.royalty; d.units += s.netUnits;
         }
-        const d = dailyMap.get(dayKey);
-        d.royalties += s.royalty;
-        d.units += s.netUnits;
       });
     }
 
     if (parsed['KENP']) {
-      const kenp = this.parseKENP(parsed['KENP']);
-      kenp.forEach(k => {
-        const asinKey = k.asin || k.title;
-        if (bookMap.has(asinKey)) {
-          bookMap.get(asinKey).pageReads += k.pages;
-        } else {
-          bookMap.set(asinKey, { asin: k.asin, title: k.title, royalties: 0, units: 0, pageReads: k.pages });
-        }
-        const dayKey = k.date;
-        if (dailyMap.has(dayKey)) {
-          dailyMap.get(dayKey).pageReads += k.pages;
-        } else {
-          dailyMap.set(dayKey, { date: dayKey, royalties: 0, units: 0, pageReads: k.pages });
+      this.parseKENP(parsed['KENP']).forEach(k => {
+        const key = k.asin || k.title;
+        if (!bookMap.has(key)) bookMap.set(key, { asin: k.asin, title: k.title, royalties:0, units:0, pageReads:0 });
+        bookMap.get(key).pageReads += k.pages;
+        if (k.date) {
+          if (!dailyMap.has(k.date)) dailyMap.set(k.date, { date: k.date, royalties:0, units:0, pageReads:0 });
+          dailyMap.get(k.date).pageReads += k.pages;
         }
       });
     }
 
-    if (parsed['Orders Processed']) {
-      const orders = this.parseOrdersProcessed(parsed['Orders Processed']);
-      orders.forEach(o => {
-        const asinKey = o.asin || o.title;
-        if (!bookMap.has(asinKey)) {
-          bookMap.set(asinKey, { asin: o.asin, title: o.title, royalties: 0, units: 0, pageReads: 0 });
-        }
-      });
-    }
-
-    appData.books = Array.from(bookMap.values()).sort((a, b) => b.royalties - a.royalties);
-    appData.dailyHistory = Array.from(dailyMap.values()).sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+    appData.books = Array.from(bookMap.values()).sort((a,b) => (b.royalties||0) - (a.royalties||0));
+    appData.dailyHistory = Array.from(dailyMap.values()).sort((a,b) => (a.date||'').localeCompare(b.date||''));
 
     if (appData.dailyHistory.length > 0) {
-      const latest = appData.dailyHistory[appData.dailyHistory.length - 1];
-      appData.today = {
-        date: latest.date, totalRoyalties: latest.royalties,
-        totalUnits: latest.units, totalPageReads: latest.pageReads,
-        books: appData.books.slice(0, 20)
-      };
+      const l = appData.dailyHistory[appData.dailyHistory.length-1];
+      appData.today = { date: l.date, totalRoyalties: l.royalties, totalUnits: l.units, totalPageReads: l.pageReads, books: appData.books.slice(0,20) };
     }
-
     if (appData.dailyHistory.length > 0) {
-      const thirtyDays = appData.dailyHistory.slice(-30);
-      appData.last30Days = {
-        totalRoyalties: thirtyDays.reduce((s, d) => s + d.royalties, 0),
-        totalUnits: thirtyDays.reduce((s, d) => s + d.units, 0),
-        totalPageReads: thirtyDays.reduce((s, d) => s + d.pageReads, 0),
-        books: appData.books.slice(0, 20)
-      };
+      const t = appData.dailyHistory.slice(-30);
+      appData.last30Days = { totalRoyalties: t.reduce((s,d)=>s+d.royalties,0), totalUnits: t.reduce((s,d)=>s+d.units,0), totalPageReads: t.reduce((s,d)=>s+d.pageReads,0), books: appData.books.slice(0,20) };
     }
-
     return appData;
   }
 
-  // ZIP reader - sync for stored, async for deflated entries
+  // ZIP reader
   async readZip(buffer) {
     const u8 = new Uint8Array(buffer);
     const files = {};
-
     const eocd = this.findEOCD(u8);
     const cdOffset = this.readU32(u8, eocd + 16);
     const cdEntries = this.readU16(u8, eocd + 10);
@@ -310,47 +215,35 @@ export class KDPXLSXParser {
   }
 
   async inflate(data) {
-    if (typeof DecompressionStream !== 'undefined') {
-      try {
-        const cs = new DecompressionStream('deflate-raw');
-        const writer = cs.writable.getWriter();
-        await writer.write(data);
-        await writer.close();
-        const reader = cs.readable.getReader();
-        const chunks = [];
-        while (true) {
-          const { value, done } = await reader.read();
-          if (done) break;
-          chunks.push(value);
-        }
-        const total = chunks.reduce((s, c) => s + c.length, 0);
-        const result = new Uint8Array(total);
-        let pos = 0;
-        for (const c of chunks) { result.set(c, pos); pos += c.length; }
-        return result;
-      } catch (e) {
-        return null;
+    try {
+      const cs = new DecompressionStream('deflate-raw');
+      const writer = cs.writable.getWriter();
+      await writer.write(data);
+      await writer.close();
+      const reader = cs.readable.getReader();
+      const chunks = [];
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        chunks.push(value);
       }
+      const total = chunks.reduce((s, c) => s + c.length, 0);
+      const result = new Uint8Array(total);
+      let p = 0;
+      for (const c of chunks) { result.set(c, p); p += c.length; }
+      return result;
+    } catch (e) {
+      return null;
     }
-    return null;
-  }
-
-  qsa(doc, sel) {
-    if (doc.querySelectorAll) return doc.querySelectorAll(sel);
-    const tag = sel.replace(/^[a-z]+/, '');
-    return doc.getElementsByTagName(sel);
   }
 
   parseWorkbook(xmlData) {
     if (!xmlData) return [];
     const doc = new DOMParser().parseFromString(new TextDecoder().decode(xmlData), 'text/xml');
     const sheets = [];
-    const sheetEls = doc.querySelectorAll ? doc.querySelectorAll('sheet') : Array.from(doc.getElementsByTagName('sheet'));
-    sheetEls.forEach(el => {
-      sheets.push({
-        id: parseInt(el.getAttribute('sheetId')),
-        name: el.getAttribute('name')
-      });
+    const els = doc.querySelectorAll ? doc.querySelectorAll('sheet') : Array.from(doc.getElementsByTagName('sheet'));
+    els.forEach(el => {
+      sheets.push({ id: parseInt(el.getAttribute('sheetId')), name: el.getAttribute('name') });
     });
     return sheets;
   }
@@ -359,12 +252,11 @@ export class KDPXLSXParser {
     if (!xmlData) return [];
     const doc = new DOMParser().parseFromString(new TextDecoder().decode(xmlData), 'text/xml');
     const strs = [];
-    const items = doc.querySelectorAll ? doc.querySelectorAll('si') : doc.getElementsByTagName('si');
-    for (let i = 0; i < items.length; i++) {
-      const si = items[i];
-      const t = si.getElementsByTagName ? si.getElementsByTagName('t')[0] : (si.querySelector ? si.querySelector('t') : null);
+    const items = doc.querySelectorAll ? doc.querySelectorAll('si') : Array.from(doc.getElementsByTagName('si'));
+    items.forEach(si => {
+      const t = si.querySelector ? si.querySelector('t') : (si.getElementsByTagName ? si.getElementsByTagName('t')[0] : null);
       strs.push(t ? (t.textContent || '') : '');
-    }
+    });
     return strs;
   }
 
@@ -372,11 +264,11 @@ export class KDPXLSXParser {
     if (!xmlData) return [];
     const doc = new DOMParser().parseFromString(new TextDecoder().decode(xmlData), 'text/xml');
     const rows = [];
-    const rowEls = doc.querySelectorAll ? doc.querySelectorAll('row') : doc.getElementsByTagName('row');
+    const rowEls = doc.querySelectorAll ? doc.querySelectorAll('row') : Array.from(doc.getElementsByTagName('row'));
     for (let ri = 0; ri < rowEls.length; ri++) {
       const rowEl = rowEls[ri];
       const cells = [];
-      const cellEls = rowEl.querySelectorAll ? rowEl.querySelectorAll('c') : rowEl.getElementsByTagName('c');
+      const cellEls = rowEl.querySelectorAll ? rowEl.querySelectorAll('c') : Array.from(rowEl.getElementsByTagName('c'));
       for (let ci = 0; ci < cellEls.length; ci++) {
         const cell = cellEls[ci];
         const type = cell.getAttribute('t');
@@ -384,8 +276,8 @@ export class KDPXLSXParser {
         let value = '';
 
         if (type === 'inlineStr') {
-          const tEls = cell.getElementsByTagName ? cell.getElementsByTagName('t') : [];
-          if (tEls.length > 0) value = tEls[0].textContent || '';
+          const isEl = cell.getElementsByTagName ? cell.getElementsByTagName('t') : [];
+          if (isEl.length > 0) value = isEl[0].textContent || '';
         } else {
           const vEl = cell.querySelector ? cell.querySelector('v') : (cell.getElementsByTagName ? cell.getElementsByTagName('v')[0] : null);
           if (vEl) value = vEl.textContent || '';
@@ -405,19 +297,11 @@ export class KDPXLSXParser {
 
   colToIndex(col) {
     let result = 0;
-    for (let i = 0; i < col.length; i++) {
-      result = result * 26 + (col.charCodeAt(i) - 64);
-    }
+    for (let i = 0; i < col.length; i++) result = result * 26 + (col.charCodeAt(i) - 64);
     return result - 1;
   }
 
-  readU16(u8, pos) {
-    return (u8[pos] | (u8[pos + 1] << 8));
-  }
-
-  readU32(u8, pos) {
-    return u8[pos] | (u8[pos + 1] << 8) | (u8[pos + 2] << 16) | (u8[pos + 3] << 24);
-  }
+  readU16(u8, pos) { return u8[pos] | (u8[pos + 1] << 8); }
+  readU32(u8, pos) { return u8[pos] | (u8[pos + 1] << 8) | (u8[pos + 2] << 16) | (u8[pos + 3] << 24); }
 }
-
 export default KDPXLSXParser;
