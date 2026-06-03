@@ -9,9 +9,9 @@ async function loadData() {
   try {
     const result = await chrome.storage.local.get(STORAGE_KEY);
     const data = result[STORAGE_KEY] || {};
-    render(data);
+    try { render(data); } catch (e) { console.error(e); }
   } catch {
-    render({});
+    try { render({}); } catch {}
   }
 }
 

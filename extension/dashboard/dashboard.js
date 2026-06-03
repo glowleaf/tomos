@@ -18,7 +18,7 @@ async function loadData() {
   } catch { data = {}; }
   allBooks = data.books || [];
   dailyHistory = data.dailyHistory || [];
-  renderAll();
+  try { renderAll(); } catch (e) { console.error('Tomos render error:', e); }
 }
 
 async function saveData() {
@@ -28,16 +28,17 @@ async function saveData() {
   await chrome.storage.local.set({ [STORAGE_KEY]: data });
 }
 
+function safe(fn) { try { fn(); } catch (e) { console.error('Tomos:', e); } }
 function renderAll() {
-  renderToday();
-  renderStats();
-  renderTopBooks(10);
-  renderTrendChart('trendChart', dailyHistory, '#4299e1');
-  renderHistoryTable();
-  renderHistoricalChart();
-  renderAllBooks();
-  renderSeries();
-  renderSettings();
+  safe(renderToday);
+  safe(renderStats);
+  safe(() => renderTopBooks(10));
+  safe(() => renderTrendChart('trendChart', dailyHistory, '#4299e1'));
+  safe(renderHistoryTable);
+  safe(renderHistoricalChart);
+  safe(renderAllBooks);
+  safe(renderSeries);
+  safe(renderSettings);
 }
 
 function fmt$(n) {
@@ -194,8 +195,6 @@ function renderTrendChart(canvasId, history, color) {
   });
   ctx.stroke();
 
-  const grad = ctx.createLinearGradient(0, pad.t, 0, pad.t + ch);
-  grad.addColorStop(0, color.replace(')', ',0.2)').replace('rgb', 'rgba').replace('#', 'rgba(66,153,225,').replace('rgba66,153,225,', 'rgba(66,153,225,'));
   ctx.lineTo(pad.l + gap * (days.length - 1), pad.t + ch);
   ctx.lineTo(pad.l, pad.t + ch);
   ctx.closePath();
