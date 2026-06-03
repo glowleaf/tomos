@@ -321,18 +321,24 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify({...raw,adsData}))}c
 function load(){try{var r=localStorage.getItem(KEY);if(r){var parsed=JSON.parse(r);raw=parsed;books=parsed.books||[];days=parsed.dailyHistory||[];adsData=parsed.adsData||[];renderToday()}}catch(e){}}
 
 function renderToday(){
-  var today=days.length?days[days.length-1]:null,yest=days.length>1?days[days.length-2]:null;
-  var last30=days.slice(-30),mR=last30.reduce((s,d)=>s+(d.royalties||0),0),mU=last30.reduce((s,d)=>s+(d.units||0),0),mP=last30.reduce((s,d)=>s+(d.pageReads||0),0);
+  var withSales=days.filter(d=>d.royalties>0);
+  var today=withSales.length?withSales[withSales.length-1]:null;
+  var yest=withSales.length>1?withSales[withSales.length-2]:null;
+  var last30=days.slice(-30),lR=last30.reduce((s,d)=>s+(d.royalties||0),0),lU=last30.reduce((s,d)=>s+(d.units||0),0),lP=last30.reduce((s,d)=>s+(d.pageReads||0),0);
+  // This month
+  var now=new Date(),thisMonth=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  var monthDays=days.filter(d=>d.date&&d.date.startsWith(thisMonth));
+  var mR=monthDays.reduce((s,d)=>s+(d.royalties||0),0),mU=monthDays.reduce((s,d)=>s+(d.units||0),0),mP=monthDays.reduce((s,d)=>s+(d.pageReads||0),0);
   document.getElementById('todayAmount').textContent=today?'$'+today.royalties.toFixed(2):'$0.00';
   document.getElementById('todayLabel').textContent=today?'earned on '+fmtD(today.date):'earned today';
   document.getElementById('todayCount').textContent=books.length;
   document.getElementById('statsRow').innerHTML=
     '<div class="stat-card"><div class="stat-label">Today</div><div class="stat-value">'+(today?'$'+today.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(today?today.units+' units':'')+'</div></div>'+
     '<div class="stat-card"><div class="stat-label">Yesterday</div><div class="stat-value">'+(yest?'$'+yest.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(yest?yest.units+' units':'')+'</div></div>'+
-    '<div class="stat-card"><div class="stat-label">This Month</div><div class="stat-value">$'+mR.toFixed(2)+'</div><div class="stat-sub">'+mU+' units</div></div>'+
-    '<div class="stat-card"><div class="stat-label">Last 30 Days</div><div class="stat-value">$'+mR.toFixed(2)+'</div><div class="stat-sub">'+fmt(mU)+' units · '+fmt(mP)+' KENP</div></div>'+
-    '<div class="stat-card"><div class="stat-label">KU Page Reads</div><div class="stat-value">'+fmt(mP)+'</div><div class="stat-sub">last 30 days</div></div>'+
-    '<div class="stat-card"><div class="stat-label">Avg/Unit</div><div class="stat-value">$'+(mU>0?(mR/mU).toFixed(2):'0.00')+'</div><div class="stat-sub">per sale</div></div>';
+    '<div class="stat-card"><div class="stat-label">This Month ('+now.toLocaleString('en-US',{month:'short'})+')</div><div class="stat-value">$'+mR.toFixed(2)+'</div><div class="stat-sub">'+fmt(mU)+' units</div></div>'+
+    '<div class="stat-card"><div class="stat-label">Last 30 Days</div><div class="stat-value">$'+lR.toFixed(2)+'</div><div class="stat-sub">'+fmt(lU)+' units · '+fmt(lP)+' KENP</div></div>'+
+    '<div class="stat-card"><div class="stat-label">KU Page Reads</div><div class="stat-value">'+fmt(lP)+'</div><div class="stat-sub">last 30 days</div></div>'+
+    '<div class="stat-card"><div class="stat-label">Avg/Unit</div><div class="stat-value">$'+(lU>0?(lR/lU).toFixed(2):'0.00')+'</div><div class="stat-sub">per sale ('+fmt(lU)+' total)</div></div>';
   books.sort((a,b)=>(b.royalties||0)-(a.royalties||0));
   document.getElementById('topBooks').innerHTML=books.length?books.slice(0,20).map((b,i)=>bookHTML(b,i+1)).join(''):'<div class="empty-state">Drop KDP reports in Settings to start</div>';
   renderChart(document.getElementById('trendChart'),days.slice(-7),'#4299e1');
