@@ -348,10 +348,28 @@ function merge(a){
 }
 
 function save(){try{localStorage.setItem(KEY,JSON.stringify({...raw,adsData}))}catch(e){}}
-function load(){try{var r=localStorage.getItem(KEY);if(r){var parsed=JSON.parse(r);raw=parsed;books=parsed.books||[];days=parsed.dailyHistory||[];adsData=parsed.adsData||[];renderToday()}}catch(e){}}
+function load(){try{var r=localStorage.getItem(KEY);if(r){var parsed=JSON.parse(r);raw=parsed;books=parsed.books||[];days=parsed.dailyHistory||[];adsData=parsed.adsData||[];cleanDays();renderToday()}}catch(e){}}
+
+function cleanDays(){
+  if(!days.length)return;
+  var mc=days.filter(d=>d.date&&d.date.length<=7).length;
+  var dc=days.filter(d=>d.date&&d.date.length>7).length;
+  raw.isMonthly=mc>dc;
+  if(mc>0&&dc>0){
+    // Mixed formats: filter to majority only
+    if(raw.isMonthly)days=days.filter(d=>!d.date||d.date.length<=7);
+    else days=days.filter(d=>!d.date||d.date.length>7);
+    save();
+  }
+}
 
 function renderToday(){
-  var isMonthly=raw.isMonthly;
+  // Detect monthly vs daily from the actual data
+  var monthlyCount=days.filter(d=>d.date&&d.date.length<=7).length;
+  var dailyCount=days.filter(d=>d.date&&d.date.length>7).length;
+  var isMonthly=monthlyCount>dailyCount;
+  // Also honor explicit flag
+  if(raw.isMonthly!==undefined)isMonthly=raw.isMonthly;
   var withSales=days.filter(d=>d.royalties>0);
   var today=withSales.length?withSales[withSales.length-1]:null;
   var yest=withSales.length>1?withSales[withSales.length-2]:null;
