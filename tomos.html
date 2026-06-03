@@ -232,7 +232,8 @@ function renderHistory(period){
   var allDates=days.map(d=>d.date).filter(d=>d).sort();
   var latestDate=allDates[allDates.length-1];
   var cutoffDate=is30&&latestDate?getCutoff(latestDate):'';
-  var entries=cutoffDate?aggregated.filter(d=>d.date>=cutoffDate):aggregated;
+  var cutoffMonth=cutoffDate?cutoffDate.slice(0,7):'';
+  var entries=cutoffDate?aggregated.filter(d=>d.date>=(d.date.length<=7?cutoffMonth:cutoffDate)):aggregated;
   var withSales=entries.filter(d=>d.royalties>0);
   var today=withSales.length?withSales[withSales.length-1]:null;
   var yest=withSales.length>1?withSales[withSales.length-2]:null;
@@ -440,7 +441,8 @@ function renderToday(){
   var allDates=days.map(d=>d.date).filter(d=>d).sort();
   var latestDate=allDates[allDates.length-1];
   var cutoffDate=latestDate?getCutoff(latestDate):'';
-  var viewEntries=cutoffDate?use.filter(d=>d.date>=cutoffDate):use;
+  var cutoffMonth=cutoffDate?cutoffDate.slice(0,7):'';
+  var viewEntries=cutoffDate?use.filter(d=>d.date>=(d.date.length<=7?cutoffMonth:cutoffDate)):use;
   var lR=viewEntries.reduce((s,d)=>s+(d.royalties||0),0),lU=viewEntries.reduce((s,d)=>s+(d.units||0),0),lP=viewEntries.reduce((s,d)=>s+(d.pageReads||0),0);
   var allR=use.reduce((s,d)=>s+(d.royalties||0),0),allU=use.reduce((s,d)=>s+(d.units||0),0),allP=use.reduce((s,d)=>s+(d.pageReads||0),0);
   document.getElementById('todayAmount').textContent=today?'$'+today.royalties.toFixed(2):'$0.00';
