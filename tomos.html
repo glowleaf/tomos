@@ -355,7 +355,28 @@ function merge(a){
 }
 
 function save(){try{localStorage.setItem(KEY,JSON.stringify({...raw,adsData}))}catch(e){}}
-function load(){try{var r=localStorage.getItem(KEY);if(r){var parsed=JSON.parse(r);raw=parsed;books=parsed.books||[];days=parsed.dailyHistory||[];adsData=parsed.adsData||[];renderToday()}}catch(e){}}
+function load(){try{var r=localStorage.getItem(KEY);if(r){var parsed=JSON.parse(r);raw=parsed;books=parsed.books||[];days=parsed.dailyHistory||[];adsData=parsed.adsData||[];normalizeDays();renderToday()}}catch(e){}}
+
+function normalizeDays(){
+  if(!days||days.length<2)return;
+  var hasMonthly=days.some(d=>d.date&&d.date.length<=7);
+  var hasDaily=days.some(d=>d.date&&d.date.length>7);
+  if(hasMonthly&&hasDaily){
+    // Aggregate daily into monthly to match
+    var monthly={};
+    days.forEach(d=>{
+      var m=d.date.length<=7?d.date:d.date.slice(0,7);
+      if(!monthly[m])monthly[m]={date:m,royalties:0,units:0,pageReads:0};
+      monthly[m].royalties+=d.royalties||0;
+      monthly[m].units+=d.units||0;
+      monthly[m].pageReads+=d.pageReads||0;
+    });
+    days=Object.values(monthly).sort((x,y)=>x.date.localeCompare(y.date));
+    raw.isMonthly=true;
+    raw.dailyHistory=days;
+    save();
+  }
+}
 
 
 function renderToday(){
