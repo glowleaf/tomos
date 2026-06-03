@@ -325,6 +325,11 @@ async function importXLSX(file){
   try{
     var p=new KDPXLSXParser(),r=await p.parseFromFile(file),a=p.toAppData(r);
     if(!a.books||!a.books.length){n('No data in '+file.name);return}
+    // Check for date format conflict
+    if(a.isMonthly!==undefined&&raw.isMonthly!==undefined&&raw.dailyHistory&&raw.dailyHistory.length>0&&a.isMonthly!==raw.isMonthly){
+      if(!confirm('This file has '+(a.isMonthly?'monthly':'daily')+' dates but existing data is '+(raw.isMonthly?'monthly':'daily')+'. Clear existing data and import fresh?')){n('Import cancelled');return}
+      books=[];days=[];raw={};adsData=[];
+    }
     merge(a);save();renderToday();n('Imported '+a.books.length+' books');
   }catch(e){n('Error: '+e.message)}
 }
