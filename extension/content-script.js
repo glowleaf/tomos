@@ -7,6 +7,12 @@
 
   function injectAll() {
     const el = document.documentElement;
+    // Load SheetJS first (via src to keep content-script small)
+    const xlsx = document.createElement('script');
+    xlsx.src = chrome.runtime.getURL('lib/xlsx.full.min.js');
+    el.appendChild(xlsx);
+    xlsx.remove();
+    // Then inline our scripts
     [PAGE_SCRIPT, XLSX_PARSER, MERGE_HELPER].forEach(code => {
       const s = document.createElement('script');
       s.textContent = code;

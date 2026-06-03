@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tomos Book Sales</title>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.mini.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;color:#333;background:#fff;min-height:100vh}
+.container{max-width:1100px;margin:0 auto;padding:20px}
+/* Logo */
+.logo-wrap{text-align:center;padding:20px 0}
+.logo{font-size:22px;font-weight:800;color:#2b6cb0;letter-spacing:-.5px}
+/* Tabs */
+.nav-tabs{display:flex;gap:0;border-bottom:2px solid #e2e8f0;margin-bottom:20px}
+.nav-tabs a{padding:10px 20px;text-decoration:none;color:#718096;font-size:14px;font-weight:500;border-bottom:2px solid transparent;margin-bottom:-2px;transition:.15s}
+.nav-tabs a:hover{color:#4299e1}
+.nav-tabs a.active,.nav-tabs .active a{color:#2b6cb0;border-bottom-color:#2b6cb0;font-weight:600}
+.tab-pane{display:none}
+.tab-pane.active{display:block}
+/* Hero */
+.text-center{text-align:center}
+.hero-amount{font-size:42px;font-weight:800;color:#1a202c;line-height:1.2}
+.hero-label{font-size:16px;color:#718096;margin-top:4px}
+.hero-sub{font-size:15px;color:#718096;margin-top:2px}
+.hero-sub strong{color:#4a5568}
+hr{border:none;border-top:1px solid #e2e8f0;margin:15px 0}
+/* Stats row */
+.stats-row{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:20px}
+.stat-card{flex:1;min-width:150px;background:#f7fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px}
+.stat-label{font-size:11px;text-transform:uppercase;color:#a0aec0;letter-spacing:.5px}
+.stat-value{font-size:22px;font-weight:700;color:#1a202c;margin-top:2px}
+.stat-sub{font-size:12px;color:#a0aec0;margin-top:2px}
+/* Section header */
+.sectionHeader{display:flex;justify-content:space-between;align-items:center;margin:15px 0}
+.sectionHeader h3{font-size:16px;font-weight:600;color:#1a202c}
+/* Book list */
+.book-list{display:grid;gap:6px}
+.book-item{display:flex;align-items:center;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;text-decoration:none;color:inherit;transition:.15s}
+.book-item:hover{border-color:#4299e1;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.book-cover{width:40px;height:60px;border-radius:4px;object-fit:cover;flex-shrink:0;background:#edf2f7;margin-right:12px;overflow:hidden}
+.book-rank{width:24px;height:24px;border-radius:50%;background:#ebf4ff;color:#4299e1;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-right:10px}
+.book-info{flex:1;min-width:0}
+.book-title{font-size:13px;font-weight:600;color:#1a202c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.book-meta{font-size:11px;color:#a0aec0;margin-top:1px}
+.book-stats{text-align:right;flex-shrink:0;margin-left:12px}
+.book-earnings{font-size:15px;font-weight:700;color:#1a202c}
+.book-units{font-size:11px;color:#a0aec0}
+/* Table */
+.table-wrap{overflow-x:auto;border:1px solid #e2e8f0;border-radius:8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:10px 14px;font-size:10px;text-transform:uppercase;color:#a0aec0;background:#f7fafc;border-bottom:1px solid #e2e8f0;font-weight:600;letter-spacing:.5px}
+td{padding:10px 14px;border-bottom:1px solid #edf2f7;color:#4a5568}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f7fafc}
+/* Chart */
+.chart-box{height:200px;border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:20px}
+.chart-box canvas{width:100%!important;height:100%!important}
+/* Drop zone */
+.drop-zone{border:2px dashed #cbd5e0;border-radius:8px;padding:30px;text-align:center;cursor:pointer;transition:.15s;background:#f7fafc;margin-top:12px}
+.drop-zone:hover,.drop-zone.dragover{border-color:#4299e1;background:#ebf4ff}
+.dz-icon{font-size:30px;color:#a0aec0;margin-bottom:6px}
+.dz-text{font-size:14px;color:#4a5568;font-weight:500}
+.dz-sub{font-size:12px;color:#a0aec0;margin-top:2px}
+.file-input{display:none}
+/* Buttons */
+.btn{display:inline-block;padding:8px 18px;border-radius:6px;border:1px solid #e2e8f0;background:#fff;color:#4a5568;font-size:12px;font-weight:500;cursor:pointer;transition:.15s;text-decoration:none}
+.btn:hover{background:#f7fafc;border-color:#cbd5e0}
+.btn-danger{color:#e53e3e;border-color:#e53e3e}
+.btn-danger:hover{background:#fff5f5}
+.btn-sm{padding:5px 12px;font-size:11px}
+/* Settings */
+.settings-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.settings-card{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:20px}
+.settings-card h3{font-size:14px;font-weight:600;margin-bottom:12px}
+.settings-card p{font-size:13px;color:#4a5568;line-height:1.6;margin-bottom:8px}
+.settings-card a{color:#4299e1;text-decoration:none}
+.settings-card a:hover{text-decoration:underline}
+.stat-line{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;color:#4a5568;border-bottom:1px solid #edf2f7}
+.stat-line:last-child{border-bottom:none}.stat-line strong{color:#1a202c}
+.actions{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
+/* Search */
+.search-bar{display:flex;gap:8px;margin-bottom:12px}
+.search-input{flex:1;padding:8px 12px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;outline:none}
+.search-input:focus{border-color:#4299e1;box-shadow:0 0 0 3px rgba(66,153,225,.15)}
+.sort-select{padding:8px 12px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;background:#fff;cursor:pointer;outline:none}
+/* Notification */
+#notif{position:fixed;bottom:20px;right:20px;background:#1a202c;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;z-index:200;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none}
+#notif.show{opacity:1;transform:translateY(0)}
+/* Series */
+.series-list{display:grid;gap:6px}
+.series-item{display:flex;justify-content:space-between;align-items:center;padding:14px;border:1px solid #e2e8f0;border-radius:8px}
+.series-name{font-weight:600;font-size:14px}
+.series-meta{font-size:12px;color:#a0aec0;margin-top:2px}
+.series-earnings{font-weight:700;font-size:16px;color:#1a202c}
+/* Empty state */
+.empty-state{text-align:center;padding:40px 20px;color:#a0aec0;font-size:13px;line-height:1.6}
+</style>
+</head>
+<body>
+
+<div class="container" id="app">
+  <div class="logo-wrap">
+    <div class="logo">Tomos Book Sales</div>
+  </div>
+
+  <ul class="nav-tabs" id="tabs">
+    <li class="active"><a href="#" data-tab="today">Today</a></li>
+    <li><a href="#" data-tab="historical">Historical</a></li>
+    <li><a href="#" data-tab="series">Series</a></li>
+    <li><a href="#" data-tab="books">Books</a></li>
+    <li><a href="#" data-tab="settings">Settings</a></li>
+  </ul>
+
+  <!-- TODAY -->
+  <div id="tab-today" class="tab-pane active">
+    <div class="text-center">
+      <div class="hero-amount" id="todayAmount">$0.00</div>
+      <div class="hero-label" id="todayLabel">earned today</div>
+      <div class="hero-sub" id="todaySub">from <strong id="todayCount">0</strong> books.</div>
+    </div>
+    <hr>
+    <div class="stats-row" id="statsRow"></div>
+    <div class="sectionHeader"><h3>Top Books</h3></div>
+    <div id="topBooks" class="book-list"></div>
+    <hr>
+    <div class="sectionHeader"><h3>7-Day Trend</h3></div>
+    <div class="chart-box"><canvas id="trendChart"></canvas></div>
+  </div>
+
+  <!-- HISTORICAL -->
+  <div id="tab-historical" class="tab-pane">
+    <div class="stats-row" id="histStats"></div>
+    <div class="sectionHeader"><h3>Daily Earnings</h3></div>
+    <div class="chart-box"><canvas id="histChart"></canvas></div>
+    <div class="sectionHeader"><h3>Daily Breakdown</h3></div>
+    <div class="table-wrap">
+      <table><thead><tr><th>Date</th><th>Royalties</th><th>Units</th><th>KENP</th><th>Avg/Unit</th></tr></thead>
+      <tbody id="historyBody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- SERIES -->
+  <div id="tab-series" class="tab-pane">
+    <div class="sectionHeader"><h3>Series Performance</h3></div>
+    <div id="seriesList" class="series-list"></div>
+  </div>
+
+  <!-- BOOKS -->
+  <div id="tab-books" class="tab-pane">
+    <div class="sectionHeader"><h3>All Books</h3></div>
+    <div class="search-bar">
+      <input type="text" id="bookSearch" class="search-input" placeholder="Search...">
+      <select id="bookSort" class="sort-select"><option value="earnings">Earnings</option><option value="units">Units</option><option value="title">Title</option></select>
+    </div>
+    <div id="allBooks" class="book-list"></div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div id="tab-settings" class="tab-pane">
+    <div class="settings-grid">
+      <div class="settings-card">
+        <h3>Import Reports</h3>
+        <p>Download <code>KDP_Dashboard-*.xlsx</code> or <code>KDP_Orders-*.xlsx</code> from <a href="https://kdpreports.amazon.com/dashboard" target="_blank">KDP Reports</a>, then drop them here.</p>
+        <div id="dropZone" class="drop-zone">
+          <div class="dz-icon">↓</div>
+          <div class="dz-text">Drop KDP XLSX files</div>
+          <div class="dz-sub">or click to select</div>
+          <input type="file" id="fileInput" class="file-input" accept=".xlsx,.json" multiple>
+        </div>
+      </div>
+      <div class="settings-card">
+        <h3>Data Summary</h3>
+        <div class="stat-line"><span>Last Updated</span><strong id="sUpdated">—</strong></div>
+        <div class="stat-line"><span>Books Tracked</span><strong id="sBooks">0</strong></div>
+        <div class="stat-line"><span>Days</span><strong id="sDays">0</strong></div>
+        <div class="stat-line"><span>Total Sales</span><strong id="sTotal">$0.00</strong></div>
+        <div class="stat-line"><span>Total KENP</span><strong id="sKENP">0</strong></div>
+        <div class="actions">
+          <button id="exportBtn" class="btn btn-sm">Export JSON</button>
+          <button id="clearBtn" class="btn btn-sm btn-danger">Clear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="notif"></div>
+
+<script>
+// == PARSER ==
+(function(){var K=class KDPXLSXParser{async parseFromFile(b){return this.parse(await b.arrayBuffer())}async parse(b){var c=XLSX.read(new Uint8Array(b),{type:"array"}),d={};c.SheetNames.forEach(e=>{var f=c.Sheets[e];f&&(d[e]=XLSX.utils.sheet_to_json(f,{header:1,defval:""}))});return d}toAppData(b){var c={today:null,thisMonth:null,last30Days:null,dailyHistory:[],books:[],lastUpdated:(new Date).toISOString()},d=new Map,e=new Map;if(b["Combined Sales"]){var f=b["Combined Sales"][0]||[],g=f.findIndex(h=>/date|royalty/i.test(h)),i=f.findIndex(h=>/title/i.test(h)),j=f.findIndex(h=>/asin|isbn/i.test(h)),k=f.findIndex(h=>/^net units|net sold/i.test(h)),l=f.findIndex(h=>/^royalty$/i.test(h));for(let h=1;h<b["Combined Sales"].length;h++){var m=b["Combined Sales"][h],n=g>=0?String(m[g]||"").slice(0,10):"",o=j>=0?String(m[j]||""):"",p=i>=0?String(m[i]||""):"Unknown",q=parseFloat(m[k])||0,r=parseFloat(m[l])||0;if(o&&(r||q)){var s=o;d.has(s)||d.set(s,{asin:o,title:p,royalties:0,units:0,pageReads:0});var t=d.get(s);t.royalties+=r,t.units+=q}if(n&&(r||q)){e.has(n)||e.set(n,{date:n,royalties:0,units:0,pageReads:0});var u=e.get(n);u.royalties+=r,u.units+=q}}}if(b.KENP){var v=b.KENP[0]||[],w=v.findIndex(h=>/date/i.test(h)),x=v.findIndex(h=>/ebook asin|^asin$/i.test(h)),y=v.findIndex(h=>/title/i.test(h)),z=v.findIndex(h=>/kenp|pages|read/i.test(h));for(let h=1;h<b.KENP.length;h++){var A=b.KENP[h],B=w>=0?String(A[w]||"").slice(0,10):"",C=x>=0?String(A[x]||""):"",D=parseFloat(A[z])||0;if(C&&D){var E=C;if(!d.has(E)){var F=y>=0?String(A[y]||""):"";d.set(E,{asin:C,title:F,royalties:0,units:0,pageReads:0})}d.get(E).pageReads+=D}if(B&&D){e.has(B)||e.set(B,{date:B,royalties:0,units:0,pageReads:0});e.get(B).pageReads+=D}}}c.books=Array.from(d.values()).sort((G,H)=>(H.royalties||0)-(G.royalties||0));c.dailyHistory=Array.from(e.values()).sort((G,H)=>(G.date||"").localeCompare(H.date||""));if(c.dailyHistory.length>0){var I=c.dailyHistory[c.dailyHistory.length-1];c.today={date:I.date,totalRoyalties:I.royalties,totalUnits:I.units,totalPageReads:I.pageReads,books:c.books.slice(0,20)}}if(c.dailyHistory.length>0){var J=c.dailyHistory.slice(-30);c.last30Days={totalRoyalties:J.reduce((G,H)=>G+H.royalties,0),totalUnits:J.reduce((G,H)=>G+H.units,0),totalPageReads:J.reduce((G,H)=>G+H.pageReads,0),books:c.books.slice(0,20)}}return c}};window.KDPXLSXParser=K;typeof module!="undefined"&&module.exports&&(module.exports=K);})();
+
+const KEY='tomos_data';let books=[],days=[],raw={};
+
+document.addEventListener('DOMContentLoaded',()=>{setupTabs();setupDrop();setupActions();load()});
+
+function setupTabs(){
+  document.querySelectorAll('.nav-tabs a').forEach(a=>{
+    a.addEventListener('click',e=>{
+      e.preventDefault();
+      document.querySelectorAll('.nav-tabs li').forEach(l=>l.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+      a.parentElement.classList.add('active');
+      var p=document.getElementById('tab-'+a.dataset.tab);
+      if(p){p.classList.add('active');if(a.dataset.tab==='historical')renderHist();if(a.dataset.tab==='series')renderSeries();if(a.dataset.tab==='books')renderBooks();if(a.dataset.tab==='settings')renderSets()}
+    });
+  });
+}
+
+function setupDrop(){
+  var dz=document.getElementById('dropZone'),fi=document.getElementById('fileInput');
+  dz.addEventListener('click',()=>fi.click());
+  dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('dragover')});
+  dz.addEventListener('dragleave',()=>dz.classList.remove('dragover'));
+  dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('dragover');handleFiles(Array.from(e.dataTransfer.files))});
+  fi.addEventListener('change',e=>{handleFiles(Array.from(e.target.files));e.target.value=''});
+}
+
+function setupActions(){
+  document.getElementById('exportBtn').addEventListener('click',doExport);
+  document.getElementById('clearBtn').addEventListener('click',doClear);
+  document.getElementById('bookSearch').addEventListener('input',renderBooks);
+  document.getElementById('bookSort').addEventListener('change',renderBooks);
+}
+
+async function handleFiles(files){
+  for(var f of files){
+    if(f.name.endsWith('.xlsx'))await importXLSX(f);
+    else if(f.name.endsWith('.json'))impJSON(f);
+    else n('Skip: '+f.name);
+  }
+}
+
+async function importXLSX(file){
+  try{
+    var p=new KDPXLSXParser(),r=await p.parseFromFile(file),a=p.toAppData(r);
+    if(!a.books||!a.books.length){n('No data in '+file.name);return}
+    merge(a);save();renderToday();n('Imported '+a.books.length+' books');
+  }catch(e){n('Error: '+e.message)}
+}
+
+function impJSON(file){
+  var r=new FileReader();
+  r.onload=function(){try{merge(JSON.parse(r.result));save();renderToday();n('JSON imported')}catch(e){n('JSON: '+e.message)}};
+  r.readAsText(file);
+}
+
+function merge(a){
+  (a.books||[]).forEach(b=>{var k=b.asin||b.title,e=books.find(x=>(x.asin||x.title)===k);if(e){e.royalties=Math.max(e.royalties||0,b.royalties||0);e.units=Math.max(e.units||0,b.units||0);e.pageReads=Math.max(e.pageReads||0,b.pageReads||0)}else books.push({...b})});
+  (a.dailyHistory||[]).forEach(d=>{var e=days.find(x=>x.date===d.date);if(e){e.royalties=Math.max(e.royalties||0,d.royalties||0);e.units=Math.max(e.units||0,d.units||0);e.pageReads=Math.max(e.pageReads||0,d.pageReads||0)}else days.push({...d})});
+  raw={books,dailyHistory:days,today:a.today,thisMonth:a.thisMonth,last30Days:a.last30Days,lastUpdated:new Date().toISOString()};
+}
+
+function save(){try{localStorage.setItem(KEY,JSON.stringify(raw))}catch(e){}}
+function load(){try{var r=localStorage.getItem(KEY);if(r){raw=JSON.parse(r);books=raw.books||[];days=raw.dailyHistory||[];renderToday()}}catch(e){}}
+
+function renderToday(){
+  var today=days.length?days[days.length-1]:null,yest=days.length>1?days[days.length-2]:null;
+  var last30=days.slice(-30),mR=last30.reduce((s,d)=>s+(d.royalties||0),0),mU=last30.reduce((s,d)=>s+(d.units||0),0),mP=last30.reduce((s,d)=>s+(d.pageReads||0),0);
+  document.getElementById('todayAmount').textContent=today?'$'+today.royalties.toFixed(2):'$0.00';
+  document.getElementById('todayLabel').textContent=today?'earned on '+fmtD(today.date):'earned today';
+  document.getElementById('todayCount').textContent=books.length;
+  document.getElementById('statsRow').innerHTML=
+    '<div class="stat-card"><div class="stat-label">Today</div><div class="stat-value">'+(today?'$'+today.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(today?today.units+' units':'')+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">Yesterday</div><div class="stat-value">'+(yest?'$'+yest.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(yest?yest.units+' units':'')+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">This Month</div><div class="stat-value">$'+mR.toFixed(2)+'</div><div class="stat-sub">'+mU+' units</div></div>'+
+    '<div class="stat-card"><div class="stat-label">Last 30 Days</div><div class="stat-value">$'+mR.toFixed(2)+'</div><div class="stat-sub">'+fmt(mU)+' units · '+fmt(mP)+' KENP</div></div>'+
+    '<div class="stat-card"><div class="stat-label">KU Page Reads</div><div class="stat-value">'+fmt(mP)+'</div><div class="stat-sub">last 30 days</div></div>'+
+    '<div class="stat-card"><div class="stat-label">Avg/Unit</div><div class="stat-value">$'+(mU>0?(mR/mU).toFixed(2):'0.00')+'</div><div class="stat-sub">per sale</div></div>';
+  books.sort((a,b)=>(b.royalties||0)-(a.royalties||0));
+  document.getElementById('topBooks').innerHTML=books.length?books.slice(0,20).map((b,i)=>bookHTML(b,i+1)).join(''):'<div class="empty-state">Drop KDP reports in Settings to start</div>';
+  renderChart(document.getElementById('trendChart'),days.slice(-7),'#4299e1');
+}
+
+function bookHTML(b,r){
+  var img=b.asin?'https://images-na.ssl-images-amazon.com/images/P/'+b.asin+'.01._SX200_SCLZZZZZZZ_.jpg':'';
+  var link=b.asin?'https://www.amazon.com/dp/'+b.asin:'#';
+  return '<a href="'+link+'" target="_blank" class="book-item"><span class="book-rank">'+r+'</span><img class="book-cover" src="'+img+'" alt="" loading="lazy" onerror="this.style.display=\'none\'"><div class="book-info"><div class="book-title">'+esc(b.title)+'</div><div class="book-meta">'+fmt(b.units||0)+' units · '+fmt(b.pageReads||0)+' KENP'+(b.asin?' · '+b.asin:'')+'</div></div><div class="book-stats"><div class="book-earnings">$'+(b.royalties||0).toFixed(2)+'</div><div class="book-units">'+(b.units||0)+' sold</div></div></a>';
+}
+
+function renderHist(){
+  var tR=days.reduce((s,d)=>s+(d.royalties||0),0),tU=days.reduce((s,d)=>s+(d.units||0),0),tP=days.reduce((s,d)=>s+(d.pageReads||0),0);
+  document.getElementById('histStats').innerHTML=
+    '<div class="stat-card"><div class="stat-label">Total Royalties</div><div class="stat-value">$'+tR.toFixed(2)+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">Total Units</div><div class="stat-value">'+fmt(tU)+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">Total KENP</div><div class="stat-value">'+fmt(tP)+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">Days Tracked</div><div class="stat-value">'+days.length+'</div></div>';
+  var sorted=[...days].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  document.getElementById('historyBody').innerHTML=sorted.length?sorted.map(d=>'<tr><td>'+fmtD(d.date)+'</td><td><strong>$'+(d.royalties||0).toFixed(2)+'</strong></td><td>'+(d.units||0)+'</td><td>'+(d.pageReads||0).toLocaleString()+'</td><td>$'+((d.units||1)>0?((d.royalties||0)/(d.units||1)).toFixed(2):'0.00')+'</td></tr>').join(''):'<tr><td colspan="5" class="empty-state">No data</td></tr>';
+  renderChart(document.getElementById('histChart'),days,'#48bb78');
+}
+
+function renderSeries(){
+  var map=new Map();
+  books.forEach(b=>{
+    var s=(b.title||'').match(/^(.+?)\s*[#:]\s*(?:\d+|[Vv]ol\.?\s*\d+)/);
+    var n=s?s[1].trim():'Uncategorized';
+    var e=map.get(n)||{name:n,royalties:0,units:0,pageReads:0,count:0};
+    e.royalties+=b.royalties||0;e.units+=b.units||0;e.pageReads+=b.pageReads||0;e.count++;
+    map.set(n,e);
+  });
+  if(map.size<=1){document.getElementById('seriesList').innerHTML='<div class="empty-state">Series are inferred from book titles (e.g. "Series Name: Book 1")</div>';return}
+  var arr=Array.from(map.values()).sort((a,b)=>(b.royalties||0)-(a.royalties||0));
+  document.getElementById('seriesList').innerHTML=arr.map(s=>'<div class="series-item"><div><div class="series-name">'+esc(s.name)+'</div><div class="series-meta">'+s.count+' books · '+fmt(s.units)+' units · '+fmt(s.pageReads)+' KENP</div></div><div class="series-earnings">$'+(s.royalties||0).toFixed(2)+'</div></div>').join('');
+}
+
+function renderBooks(){
+  var q=(document.getElementById('bookSearch').value||'').toLowerCase(),sort=document.getElementById('bookSort').value;
+  var list=[...books];
+  if(q)list=list.filter(b=>(b.title||'').toLowerCase().includes(q));
+  if(sort==='earnings')list.sort((a,b)=>(b.royalties||0)-(a.royalties||0));
+  else if(sort==='units')list.sort((a,b)=>(b.units||0)-(a.units||0));
+  else if(sort==='title')list.sort((a,b)=>(a.title||'').localeCompare(b.title||''));
+  document.getElementById('allBooks').innerHTML=list.length?list.map((b,i)=>bookHTML(b,i+1)).join(''):'<div class="empty-state">No books match</div>';
+}
+
+function renderSets(){
+  document.getElementById('sUpdated').textContent=raw.lastUpdated?new Date(raw.lastUpdated).toLocaleString():'Never';
+  document.getElementById('sBooks').textContent=books.length;
+  document.getElementById('sDays').textContent=days.length;
+  document.getElementById('sTotal').textContent='$'+days.reduce((s,d)=>s+(d.royalties||0),0).toFixed(2);
+  document.getElementById('sKENP').textContent=fmt(days.reduce((s,d)=>s+(d.pageReads||0),0));
+}
+
+function renderChart(canvas,data,color){
+  if(!canvas||!data||data.length<2)return;
+  var ctx=canvas.getContext('2d'),rect=canvas.parentElement.getBoundingClientRect(),dpr=window.devicePixelRatio||1;
+  canvas.width=rect.width*dpr;canvas.height=rect.height*dpr;canvas.style.width=rect.width+'px';canvas.style.height=rect.height+'px';
+  ctx.scale(dpr,dpr);ctx.clearRect(0,0,rect.width,rect.height);
+  var sorted=[...data].sort((a,b)=>(a.date||'').localeCompare(b.date||'')),w=rect.width,h=rect.height,pad={t:15,b:25,l:55,r:15},cw=w-pad.l-pad.r,ch=h-pad.t-pad.b;
+  if(sorted.length<2){ctx.fillStyle='#a0aec0';ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText('Not enough data',w/2,h/2);return}
+  var vals=sorted.map(d=>d.royalties||0),max=Math.max(...vals,1)*1.1;
+  ctx.fillStyle='#a0aec0';ctx.font='10px sans-serif';ctx.textAlign='right';
+  for(var i=0;i<=4;i++){var v=(max*i)/4,y=pad.t+ch-(ch*i)/4;ctx.fillText('$'+v.toFixed(2),pad.l-6,y+3);ctx.strokeStyle='#edf2f7';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke()}
+  var gap=cw/(sorted.length-1);ctx.strokeStyle=color;ctx.lineWidth=2;ctx.beginPath();
+  sorted.forEach((d,i)=>{var x=pad.l+gap*i,y=pad.t+ch-(vals[i]/max)*ch;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y)});
+  ctx.stroke();
+  ctx.lineTo(pad.l+gap*(sorted.length-1),pad.t+ch);ctx.lineTo(pad.l,pad.t+ch);ctx.closePath();
+  ctx.fillStyle=color.replace('#','rgba(')+',0.1)'.replace('rgba(4','rgba(4');try{ctx.fill()}catch(e){}
+  sorted.forEach((d,i)=>{var x=pad.l+gap*i,y=pad.t+ch-(vals[i]/max)*ch;ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,3,0,2*Math.PI);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x,y,1.5,0,2*Math.PI);ctx.fill()});
+  ctx.fillStyle='#a0aec0';ctx.font='10px sans-serif';ctx.textAlign='center';
+  sorted.forEach((d,i)=>{ctx.fillText((()=>{try{return new Date(d.date).toLocaleDateString('en-US',{month:'short',day:'numeric'})}catch{return d.date||''}})(),pad.l+gap*i,pad.t+ch+16)});
+}
+
+function doExport(){
+  var b=new Blob([JSON.stringify(raw,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');
+  a.href=u;a.download='tomos-'+new Date().toISOString().split('T')[0]+'.json';a.click();URL.revokeObjectURL(u);n('Exported');
+}
+
+function doClear(){
+  if(!confirm('Delete all data?'))return;
+  books=[];days=[];raw={};localStorage.removeItem(KEY);renderToday();n('Cleared');
+}
+
+function fmt(n){if(n==null||isNaN(n))return'0';if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return n.toLocaleString()}
+function fmtD(d){if(!d)return'';try{return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}catch{return d}}
+function esc(s){if(!s)return'';var d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function n(m){var e=document.getElementById('notif');e.textContent=m;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),2500)}
+</script>
+</body>
+</html>
