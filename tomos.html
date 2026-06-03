@@ -267,19 +267,20 @@ async function importCSV(file){
     var kenpIdx=ci('kenp read'),kenpRoyIdx=ci('estimated kenp royalties');
 
     rows.forEach(r=>{
-      var name=nameIdx>=0?r[nameIdx]:'',spend=parseFloat(r[spendIdx])||0,sales=parseFloat(r[salesIdx])||0;
+      var name=nameIdx>=0?r[nameIdx]:'',spend=parseMoney(r[spendIdx]),sales=parseMoney(r[salesIdx]);
       var acos=acosIdx>=0?parseFloat(r[acosIdx]):(spend>0?sales/spend:0);
       if(name&&(spend>0||sales>0)){
         var existing=adsData.find(a=>a.name===name);
         if(existing){
-          existing.spend+=spend;existing.sales+=sales;existing.purchases+=(parseFloat(r[purIdx])||0);
+          existing.spend+=spend;existing.sales+=sales;existing.purchases+=(parseMoney(r[purIdx]));
           existing.impressions+=(parseFloat(r[impIdx])||0);existing.clicks+=(parseFloat(r[clickIdx])||0);
           existing.kenpRead+=(parseFloat(r[kenpIdx])||0);existing.kenpRoyalties+=(parseFloat(r[kenpRoyIdx])||0);
+          existing.acos=existing.spend>0?existing.sales/existing.spend:0;
         }else{
           adsData.push({
-            name,spend,sales,acos,
-            purchases:parseFloat(r[purIdx])||0,impressions:parseFloat(r[impIdx])||0,
-            clicks:parseFloat(r[clickIdx])||0,ctr:parseFloat(r[ctrIdx])||0,cpc:parseFloat(r[cpcIdx])||0,
+            name,spend,sales,acos:spend>0?sales/spend:0,
+            purchases:parseMoney(r[purIdx]),impressions:parseFloat(r[impIdx])||0,
+            clicks:parseFloat(r[clickIdx])||0,ctr:parseFloat(r[ctrIdx])||0,cpc:parseMoney(r[cpcIdx]),
             kenpRead:parseFloat(r[kenpIdx])||0,kenpRoyalties:parseFloat(r[kenpRoyIdx])||0
           });
         }
@@ -301,6 +302,8 @@ function parseCSVLine(line){
   result.push(current);
   return result;
 }
+
+function parseMoney(s){return parseFloat((s||'').replace(/[$,£€A$CA$]/g,''))||0}
 
 async function importXLSX(file){
   try{
