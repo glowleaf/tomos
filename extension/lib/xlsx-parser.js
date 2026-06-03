@@ -335,12 +335,18 @@ export class KDPXLSXParser {
     return null;
   }
 
+  qsa(doc, sel) {
+    if (doc.querySelectorAll) return doc.querySelectorAll(sel);
+    const tag = sel.replace(/^[a-z]+/, '');
+    return doc.getElementsByTagName(sel);
+  }
+
   parseWorkbook(xmlData) {
     if (!xmlData) return [];
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(new TextDecoder().decode(xmlData), 'text/xml');
+    const doc = new DOMParser().parseFromString(new TextDecoder().decode(xmlData), 'text/xml');
     const sheets = [];
-    doc.querySelectorAll('sheet').forEach(el => {
+    const sheetEls = doc.querySelectorAll ? doc.querySelectorAll('sheet') : Array.from(doc.getElementsByTagName('sheet'));
+    sheetEls.forEach(el => {
       sheets.push({
         id: parseInt(el.getAttribute('sheetId')),
         name: el.getAttribute('name')
@@ -351,37 +357,49 @@ export class KDPXLSXParser {
 
   parseSharedStrings(xmlData) {
     if (!xmlData) return [];
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(new TextDecoder().decode(xmlData), 'text/xml');
+    const doc = new DOMParser().parseFromString(new TextDecoder().decode(xmlData), 'text/xml');
     const strs = [];
-    doc.querySelectorAll('si').forEach(si => {
-      const t = si.querySelector('t');
-      strs.push(t ? t.textContent : '');
-    });
+    const items = doc.querySelectorAll ? doc.querySelectorAll('si') : doc.getElementsByTagName('si');
+    for (let i = 0; i < items.length; i++) {
+      const si = items[i];
+      const t = si.getElementsByTagName ? si.getElementsByTagName('t')[0] : (si.querySelector ? si.querySelector('t') : null);
+      strs.push(t ? (t.textContent || '') : '');
+    }
     return strs;
   }
 
   parseSheetRows(xmlData, sharedStrings) {
     if (!xmlData) return [];
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(new TextDecoder().decode(xmlData), 'text/xml');
+    const doc = new DOMParser().parseFromString(new TextDecoder().decode(xmlData), 'text/xml');
     const rows = [];
-    doc.querySelectorAll('row').forEach(rowEl => {
+    const rowEls = doc.querySelectorAll ? doc.querySelectorAll('row') : doc.getElementsByTagName('row');
+    for (let ri = 0; ri < rowEls.length; ri++) {
+      const rowEl = rowEls[ri];
       const cells = [];
-      rowEl.querySelectorAll('c').forEach(cell => {
-        const v = cell.querySelector('v');
+      const cellEls = rowEl.querySelectorAll ? rowEl.querySelectorAll('c') : rowEl.getElementsByTagName('c');
+      for (let ci = 0; ci < cellEls.length; ci++) {
+        const cell = cellEls[ci];
         const type = cell.getAttribute('t');
         const ref = cell.getAttribute('r');
-        let value = v ? v.textContent : '';
-        if (type === 's' && value) {
-          value = sharedStrings[parseInt(value)] || value;
+        let value = '';
+
+        if (type === 'inlineStr') {
+          const tEls = cell.getElementsByTagName ? cell.getElementsByTagName('t') : [];
+          if (tEls.length > 0) value = tEls[0].textContent || '';
+        } else {
+          const vEl = cell.querySelector ? cell.querySelector('v') : (cell.getElementsByTagName ? cell.getElementsByTagName('v')[0] : null);
+          if (vEl) value = vEl.textContent || '';
+          if (type === 's' && value) {
+            value = sharedStrings[parseInt(value)] || value;
+          }
         }
+
         const colMatch = ref ? ref.match(/^([A-Z]+)/) : null;
         const colIndex = colMatch ? this.colToIndex(colMatch[1]) : cells.length;
         cells[colIndex] = value;
-      });
+      }
       rows.push(cells);
-    });
+    }
     return rows;
   }
 
