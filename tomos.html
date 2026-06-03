@@ -169,7 +169,12 @@ tr:last-child td{border-bottom:none}
 <script>
 const KEY='tomos_data';let books=[],days=[],adsData=[],raw={};
 
-document.addEventListener('DOMContentLoaded',()=>{setupTabs();setupDrop();setupActions();load()});
+document.addEventListener('DOMContentLoaded',()=>{
+  try{setupTabs()}catch(e){console.log('Tabs:',e)}
+  try{setupDrop()}catch(e){console.log('Drop:',e)}
+  try{setupActions()}catch(e){console.log('Actions:',e)}
+  try{load()}catch(e){console.log('Load:',e)}
+});
 
 function setupTabs(){
   document.querySelectorAll('#tabs a').forEach(a=>{
