@@ -378,20 +378,34 @@ function renderAds(){
 }
 
 function renderToday(){
-  var withSales=days.filter(d=>d.royalties>0);
+  var hasMonthly=days.some(d=>d.date&&d.date.length<=7);
+  var use=hasMonthly?days.filter(d=>d.date&&d.date.length<=7):days;
+  // If monthly, also aggregate KENP from daily entries into their month
+  if(hasMonthly){
+    var monthlyAgg={};
+    days.forEach(d=>{
+      var m=d.date.length<=7?d.date:d.date.slice(0,7);
+      if(!monthlyAgg[m])monthlyAgg[m]={date:m,royalties:0,units:0,pageReads:0};
+      monthlyAgg[m].royalties+=d.royalties||0;
+      monthlyAgg[m].units+=d.units||0;
+      monthlyAgg[m].pageReads+=d.pageReads||0;
+    });
+    use=Object.values(monthlyAgg).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  }
+  var withSales=use.filter(d=>d.royalties>0);
   var today=withSales.length?withSales[withSales.length-1]:null;
   var yest=withSales.length>1?withSales[withSales.length-2]:null;
-  var last30=days.slice(-30);
-  var lR=last30.reduce((s,d)=>s+(d.royalties||0),0),lU=last30.reduce((s,d)=>s+(d.units||0),0),lP=last30.reduce((s,d)=>s+(d.pageReads||0),0);
-  var allR=days.reduce((s,d)=>s+(d.royalties||0),0),allU=days.reduce((s,d)=>s+(d.units||0),0),allP=days.reduce((s,d)=>s+(d.pageReads||0),0);
+  var viewEntries=hasMonthly?use.slice(-1):use.slice(-30);
+  var lR=viewEntries.reduce((s,d)=>s+(d.royalties||0),0),lU=viewEntries.reduce((s,d)=>s+(d.units||0),0),lP=viewEntries.reduce((s,d)=>s+(d.pageReads||0),0);
+  var allR=use.reduce((s,d)=>s+(d.royalties||0),0),allU=use.reduce((s,d)=>s+(d.units||0),0),allP=use.reduce((s,d)=>s+(d.pageReads||0),0);
   document.getElementById('todayAmount').textContent=today?'$'+today.royalties.toFixed(2):'$0.00';
-  document.getElementById('todayLabel').textContent=today?'earned on '+fmtD(today.date):'earned today';
+  document.getElementById('todayLabel').textContent=today?(hasMonthly?'earned in '+today.date:'earned on '+fmtD(today.date)):'earned today';
   document.getElementById('todayCount').textContent=books.length;
   document.getElementById('stats').innerHTML=
-    '<div class="stat"><div class="stat-lbl">Today</div><div class="stat-val">'+(today?'$'+today.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(today?today.units+' units':'')+'</div></div>'+
-    '<div class="stat"><div class="stat-lbl">Yesterday</div><div class="stat-val">'+(yest?'$'+yest.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(yest?yest.units+' units':'')+'</div></div>'+
-    '<div class="stat"><div class="stat-lbl">Last 30 Days</div><div class="stat-val">$'+lR.toFixed(2)+'</div><div class="stat-sub">'+fmt(lU)+' units ~ '+fmt(lP)+' KENP</div></div>'+
-    '<div class="stat"><div class="stat-lbl">KU Pages</div><div class="stat-val">'+fmt(lP)+'</div><div class="stat-sub">last 30 days</div></div>'+
+    '<div class="stat"><div class="stat-lbl">'+(hasMonthly?'Latest Month':'Today')+'</div><div class="stat-val">'+(today?'$'+today.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(today?today.units+' units':'')+'</div></div>'+
+    '<div class="stat"><div class="stat-lbl">'+(hasMonthly?'Prev Month':'Yesterday')+'</div><div class="stat-val">'+(yest?'$'+yest.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(yest?yest.units+' units':'')+'</div></div>'+
+    '<div class="stat"><div class="stat-lbl">'+(hasMonthly?'This Month (~30 days)':'Last 30 Days')+'</div><div class="stat-val">$'+lR.toFixed(2)+'</div><div class="stat-sub">'+fmt(lU)+' units ~ '+fmt(lP)+' KENP</div></div>'+
+    '<div class="stat"><div class="stat-lbl">KU Pages</div><div class="stat-val">'+fmt(lP)+'</div><div class="stat-sub"></div></div>'+
     '<div class="stat"><div class="stat-lbl">Avg/Unit</div><div class="stat-val">$'+(lU>0?(lR/lU).toFixed(2):'0.00')+'</div><div class="stat-sub">per sale</div></div>'+
     '<div class="stat"><div class="stat-lbl">All Time</div><div class="stat-val">$'+allR.toFixed(2)+'</div><div class="stat-sub">'+fmt(allU)+' units ~ '+fmt(allP)+' KENP</div></div>';
   
