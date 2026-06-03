@@ -418,8 +418,8 @@ function renderToday(){
     '<div class="stat"><div class="stat-lbl">Avg/Unit</div><div class="stat-val">$'+(lU>0?(lR/lU).toFixed(2):'0.00')+'</div><div class="stat-sub">per sale</div></div>'+
     '<div class="stat"><div class="stat-lbl">All Time</div><div class="stat-val">$'+allR.toFixed(2)+'</div><div class="stat-sub">'+fmt(allU)+' units ~ '+fmt(allP)+' KENP</div></div>';
   
-  // Top books: use 30-day data if available, else lifetime
-  var topBooks=raw.top30Books&&raw.top30Books.length?raw.top30Books:[...books].sort((a,b)=>(b.royalties||0)-(a.royalties||0));
+  // Top books: use lifetime for monthly view, 30-day for daily view
+  var topBooks=hasMonthly?[...books].sort((a,b)=>(b.royalties||0)-(a.royalties||0)):(raw.top30Books&&raw.top30Books.length?raw.top30Books:[...books].sort((a,b)=>(b.royalties||0)-(a.royalties||0)));
   document.getElementById('topBooks').innerHTML=topBooks.length?topBooks.slice(0,20).map((b,i)=>bookHTML(b,i+1)).join(''):'<div class="empty-state">Import KDP reports to start</div>';
   
   // Pie chart: top 5 books + Other (use 30-day data)
