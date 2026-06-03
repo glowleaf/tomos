@@ -185,13 +185,13 @@ tr:hover td{background:#f7fafc}
       </div>
       <div class="settings-card">
         <h3>Data Summary</h3>
-        <div class="stat-line"><span>Data Type</span><strong id="sType" style="font-size:11px">—</strong></div>
-        <div class="stat-line"><span>Last Updated</span><strong id="sUpdated">—</strong></div>
+        <div class="stat-line"><span>Data Type</span><strong id="sType" style="font-size:11px">-</strong></div>
+        <div class="stat-line"><span>Last Updated</span><strong id="sUpdated">-</strong></div>
         <div class="stat-line"><span>Books Tracked</span><strong id="sBooks">0</strong></div>
         <div class="stat-line"><span>Days</span><strong id="sDays">0</strong></div>
         <div class="stat-line"><span>Total Sales</span><strong id="sTotal">$0.00</strong></div>
         <div class="stat-line"><span>Total KENP</span><strong id="sKENP">0</strong></div>
-        <div class="stat-line"><span>Last 5 days</span><strong id="sLastDays" style="font-size:11px;max-width:180px;text-align:right">—</strong></div>
+        <div class="stat-line"><span>Last 5 days</span><strong id="sLastDays" style="font-size:11px;max-width:180px;text-align:right">-</strong></div>
         <div class="actions">
           <button id="exportBtn" class="btn btn-sm">Export JSON</button>
           <button id="clearBtn" class="btn btn-sm btn-danger">Clear</button>
@@ -240,6 +240,13 @@ function setupActions(){
   document.getElementById('clearBtn').addEventListener('click',doClear);
   document.getElementById('bookSearch').addEventListener('input',renderBooks);
   document.getElementById('bookSort').addEventListener('change',renderBooks);
+  var dbg=document.getElementById('debugBtn');
+  if(dbg)dbg.addEventListener('click',function(){
+    var el=document.getElementById('debugOutput');
+    if(el.style.display==='block'){el.style.display='none';return}
+    el.style.display='block';
+    el.textContent='Total days: '+days.length+'\nLast 10:\n'+days.slice(-10).map(d=>d.date+' $'+d.royalties.toFixed(2)+' '+d.units+'u '+d.pageReads+'p').join('\n');
+  });
 }
 
 async function handleFiles(files){
@@ -303,7 +310,7 @@ function parseCSVLine(line){
   return result;
 }
 
-function parseMoney(s){return parseFloat((s||'').replace(/[$,£€A$CA$]/g,''))||0}
+function parseMoney(s){return parseFloat((s||'').replace(/[$,]/g,''))||0}
 
 async function importXLSX(file){
   try{
@@ -346,10 +353,10 @@ function renderToday(){
     '<div class="stat-card"><div class="stat-label">'+(isMonthly?'Latest Month':'Today')+'</div><div class="stat-value">'+(today?'$'+today.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(today?today.units+' units':'')+'</div></div>'+
     '<div class="stat-card"><div class="stat-label">'+(isMonthly?'Previous Month':'Yesterday')+'</div><div class="stat-value">'+(yest?'$'+yest.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(yest?yest.units+' units':'')+'</div></div>'+
     '<div class="stat-card"><div class="stat-label">This Month ('+now.toLocaleString('en-US',{month:'short'})+')</div><div class="stat-value">$'+mR.toFixed(2)+'</div><div class="stat-sub">'+fmt(mU)+' units</div></div>'+
-    '<div class="stat-card"><div class="stat-label">'+(isMonthly?'Last 6 Months':'Last 30 Days')+'</div><div class="stat-value">$'+vR.toFixed(2)+'</div><div class="stat-sub">'+fmt(vU)+' units · '+fmt(vP)+' KENP</div></div>'+
+    '<div class="stat-card"><div class="stat-label">'+(isMonthly?'Last 6 Months':'Last 30 Days')+'</div><div class="stat-value">$'+vR.toFixed(2)+'</div><div class="stat-sub">'+fmt(vU)+' units ~ '+fmt(vP)+' KENP</div></div>'+
     '<div class="stat-card"><div class="stat-label">KU Page Reads</div><div class="stat-value">'+fmt(vP)+'</div><div class="stat-sub">'+(isMonthly?'last 6 months':'last 30 days')+'</div></div>'+
     '<div class="stat-card"><div class="stat-label">Avg/Month</div><div class="stat-value">$'+(days.length>0?(allR/days.length).toFixed(2):'0.00')+'</div><div class="stat-sub">per '+(isMonthly?'month':'day')+' ('+fmt(allU/days.length)+' units)</div></div>'+
-    '<div class="stat-card" style="background:#ebf8ff;border-color:#bee3f8"><div class="stat-label">All Time</div><div class="stat-value">$'+allR.toFixed(2)+'</div><div class="stat-sub">'+fmt(allU)+' units · '+fmt(allP)+' KENP · '+days.length+' '+(isMonthly?'months':'days')+'</div></div>';
+    '<div class="stat-card" style="background:#ebf8ff;border-color:#bee3f8"><div class="stat-label">All Time</div><div class="stat-value">$'+allR.toFixed(2)+'</div><div class="stat-sub">'+fmt(allU)+' units ~ '+fmt(allP)+' KENP ~ '+days.length+' '+(isMonthly?'months':'days')+'</div></div>';
   books.sort((a,b)=>(b.royalties||0)-(a.royalties||0));
   document.getElementById('topBooks').innerHTML=books.length?books.slice(0,20).map((b,i)=>bookHTML(b,i+1)).join(''):'<div class="empty-state">Drop KDP reports in Settings to start</div>';
   var chartData=raw.isMonthly?days:days.slice(-7);
@@ -359,7 +366,7 @@ function renderToday(){
 function bookHTML(b,r){
   var img=b.asin?'https://images-na.ssl-images-amazon.com/images/P/'+b.asin+'.01._SX200_SCLZZZZZZZ_.jpg':'';
   var link=b.asin?'https://www.amazon.com/dp/'+b.asin:'#';
-  return '<a href="'+link+'" target="_blank" class="book-item"><span class="book-rank">'+r+'</span><img class="book-cover" src="'+img+'" alt="" loading="lazy" onerror="this.style.display=\'none\'"><div class="book-info"><div class="book-title">'+esc(b.title)+'</div><div class="book-meta">'+fmt(b.units||0)+' units · '+fmt(b.pageReads||0)+' KENP'+(b.asin?' · '+b.asin:'')+'</div></div><div class="book-stats"><div class="book-earnings">$'+(b.royalties||0).toFixed(2)+'</div><div class="book-units">'+(b.units||0)+' sold</div></div></a>';
+  return '<a href="'+link+'" target="_blank" class="book-item"><span class="book-rank">'+r+'</span><img class="book-cover" src="'+img+'" alt="" loading="lazy" onerror="this.style.display=\'none\'"><div class="book-info"><div class="book-title">'+esc(b.title)+'</div><div class="book-meta">'+fmt(b.units||0)+' units ~ '+fmt(b.pageReads||0)+' KENP'+(b.asin?' ~ '+b.asin:'')+'</div></div><div class="book-stats"><div class="book-earnings">$'+(b.royalties||0).toFixed(2)+'</div><div class="book-units">'+(b.units||0)+' sold</div></div></a>';
 }
 
 function renderHist(){
@@ -385,7 +392,7 @@ function renderSeries(){
   });
   if(map.size<=1){document.getElementById('seriesList').innerHTML='<div class="empty-state">Series are inferred from book titles (e.g. "Series Name: Book 1")</div>';return}
   var arr=Array.from(map.values()).sort((a,b)=>(b.royalties||0)-(a.royalties||0));
-  document.getElementById('seriesList').innerHTML=arr.map(s=>'<div class="series-item"><div><div class="series-name">'+esc(s.name)+'</div><div class="series-meta">'+s.count+' books · '+fmt(s.units)+' units · '+fmt(s.pageReads)+' KENP</div></div><div class="series-earnings">$'+(s.royalties||0).toFixed(2)+'</div></div>').join('');
+  document.getElementById('seriesList').innerHTML=arr.map(s=>'<div class="series-item"><div><div class="series-name">'+esc(s.name)+'</div><div class="series-meta">'+s.count+' books ~ '+fmt(s.units)+' units ~ '+fmt(s.pageReads)+' KENP</div></div><div class="series-earnings">$'+(s.royalties||0).toFixed(2)+'</div></div>').join('');
 }
 
 function renderBooks(){
@@ -404,8 +411,9 @@ function renderSets(){
   document.getElementById('sDays').textContent=days.length;
   document.getElementById('sTotal').textContent='$'+days.reduce((s,d)=>s+(d.royalties||0),0).toFixed(2);
   document.getElementById('sKENP').textContent=fmt(days.reduce((s,d)=>s+(d.pageReads||0),0));
-  document.getElementById('sLastDays').textContent=days.length?days.slice(-5).map(d=>d.date+' $'+d.royalties.toFixed(2)).join(', '):'—';
+  document.getElementById('sLastDays').textContent=days.length?days.slice(-5).map(d=>d.date+' $'+d.royalties.toFixed(2)).join(', '):'-';
   document.getElementById('sType').textContent=raw.isMonthly?'Monthly summary ('+days.length+' months)':'Daily data ('+days.length+' days)';
+}
 
 function renderChart(canvas,data,color,isMonthly){
   if(!canvas||!data||data.length<2)return;
@@ -441,7 +449,7 @@ function renderAds(){
   document.getElementById('adsBody').innerHTML=sorted.length?sorted.map(a=>{
     var acosPct=a.spend>0?((a.spend/a.sales)*100).toFixed(1):'0.0';
     var roas=a.spend>0?(a.sales/a.spend).toFixed(2):'0.00';
-    return '<tr><td><strong>'+esc(a.name)+'</strong></td><td>$'+a.spend.toFixed(2)+'</td><td>$'+a.sales.toFixed(2)+'</td><td>'+acosPct+'%</td><td>'+(a.purchases||0)+'</td><td>'+(a.impressions||0).toLocaleString()+'</td><td>'+(a.clicks||0)+'</td><td>'+(a.ctr?(a.ctr*100).toFixed(2)+'%':'—')+'</td><td>$'+(a.cpc||0).toFixed(2)+'</td></tr>';
+    return '<tr><td><strong>'+esc(a.name)+'</strong></td><td>$'+a.spend.toFixed(2)+'</td><td>$'+a.sales.toFixed(2)+'</td><td>'+acosPct+'%</td><td>'+(a.purchases||0)+'</td><td>'+(a.impressions||0).toLocaleString()+'</td><td>'+(a.clicks||0)+'</td><td>'+(a.ctr?(a.ctr*100).toFixed(2)+'%':'-')+'</td><td>$'+(a.cpc||0).toFixed(2)+'</td></tr>';
   }).join(''):'<tr><td colspan="9" class="empty-state">Drop your Amazon Ads CSV in Settings to see campaign data</td></tr>';
 }
 
