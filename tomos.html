@@ -379,18 +379,27 @@ function renderAds(){
 
 function renderToday(){
   var hasMonthly=days.some(d=>d.date&&d.date.length<=7);
-  var use=hasMonthly?days.filter(d=>d.date&&d.date.length<=7):days;
-  // If monthly, also aggregate KENP from daily entries into their month
+  // If monthly data exists, use monthly entries directly + aggregate KENP from daily entries only
+  var use;
   if(hasMonthly){
-    var monthlyAgg={};
+    var monthlyMap={};
     days.forEach(d=>{
-      var m=d.date.length<=7?d.date:d.date.slice(0,7);
-      if(!monthlyAgg[m])monthlyAgg[m]={date:m,royalties:0,units:0,pageReads:0};
-      monthlyAgg[m].royalties+=d.royalties||0;
-      monthlyAgg[m].units+=d.units||0;
-      monthlyAgg[m].pageReads+=d.pageReads||0;
+      if(d.date&&d.date.length<=7){
+        // Monthly CS entry: use directly
+        if(!monthlyMap[d.date])monthlyMap[d.date]={date:d.date,royalties:0,units:0,pageReads:0};
+        monthlyMap[d.date].royalties+=d.royalties||0;
+        monthlyMap[d.date].units+=d.units||0;
+        monthlyMap[d.date].pageReads+=d.pageReads||0;
+      }else if(d.date&&d.date.length>7){
+        // Daily KENP entry: add pageReads only (royalties from daily Orders file would double-count)
+        var m=d.date.slice(0,7);
+        if(!monthlyMap[m])monthlyMap[m]={date:m,royalties:0,units:0,pageReads:0};
+        monthlyMap[m].pageReads+=d.pageReads||0;
+      }
     });
-    use=Object.values(monthlyAgg).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+    use=Object.values(monthlyMap).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  }else{
+    use=days;
   }
   var withSales=use.filter(d=>d.royalties>0);
   var today=withSales.length?withSales[withSales.length-1]:null;
@@ -418,8 +427,8 @@ function renderToday(){
   var pieData=top5.map(b=>({label:b.title,value:b.royalties||0,asin:b.asin})).concat(otherR>0?[{label:'Other',value:otherR}]:[]);
   renderPie(pieData);
   
-  // Bar chart: last 14 days
-  renderBar(days.slice(-14));
+  // Bar chart: last 14 days/months
+  renderBar(hasMonthly?use.slice(-14):days.slice(-14));
 }
 
 function bookHTML(b,r){
