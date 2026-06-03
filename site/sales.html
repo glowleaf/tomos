@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tomos Book Sales</title>
-<script src="./extension/lib/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.mini.min.js"></script>
 <script>(function(){var KDPXLSXParser=class{async parseFromFile(b){return this.parse(await b.arrayBuffer())}async parse(b){var c=XLSX.read(new Uint8Array(b),{type:"array"}),d={};c.SheetNames.forEach(e=>{var f=c.Sheets[e];f&&(d[e]=XLSX.utils.sheet_to_json(f,{header:1,defval:""}))});return d}toAppData(b){var c={today:null,thisMonth:null,last30Days:null,dailyHistory:[],books:[],lastUpdated:(new Date).toISOString()},d=new Map,e=new Map;if(b["Combined Sales"]){var f=b["Combined Sales"][0]||[],g=f.findIndex(h=>/date|royalty/i.test(h)),i=f.findIndex(h=>/title/i.test(h)),j=f.findIndex(h=>/asin|isbn/i.test(h)),k=f.findIndex(h=>/^net units|net sold/i.test(h)),l=f.findIndex(h=>/^royalty$/i.test(h));for(let h=1;h<b["Combined Sales"].length;h++){var m=b["Combined Sales"][h],n=g>=0?String(m[g]||"").slice(0,10):"",o=j>=0?String(m[j]||""):"",p=i>=0?String(m[i]||""):"Unknown",q=parseFloat(m[k])||0,r=parseFloat(m[l])||0;if(o&&(r||q)){var s=o;d.has(s)||d.set(s,{asin:o,title:p,royalties:0,units:0,pageReads:0});var t=d.get(s);t.royalties+=r,t.units+=q}if(n&&(r||q)){e.has(n)||e.set(n,{date:n,royalties:0,units:0,pageReads:0});var u=e.get(n);u.royalties+=r,u.units+=q}}}if(b.KENP){var v=b.KENP[0]||[],w=v.findIndex(h=>/date/i.test(h)),x=v.findIndex(h=>/ebook asin|^asin$/i.test(h)),y=v.findIndex(h=>/title/i.test(h)),z=v.findIndex(h=>/kenp|pages|read/i.test(h));for(let h=1;h<b.KENP.length;h++){var A=b.KENP[h],B=w>=0?String(A[w]||"").slice(0,10):"",C=x>=0?String(A[x]||""):"",D=parseFloat(A[z])||0;if(C&&D){var E=C;if(!d.has(E)){var F=y>=0?String(A[y]||""):"";d.set(E,{asin:C,title:F,royalties:0,units:0,pageReads:0})}d.get(E).pageReads+=D}if(B&&D){e.has(B)||e.set(B,{date:B,royalties:0,units:0,pageReads:0});e.get(B).pageReads+=D}}}c.books=Array.from(d.values()).sort((G,H)=>(H.royalties||0)-(G.royalties||0));c.dailyHistory=Array.from(e.values()).sort((G,H)=>(G.date||"").localeCompare(H.date||""));if(c.dailyHistory.length>0){var I=c.dailyHistory[c.dailyHistory.length-1];c.today={date:I.date,totalRoyalties:I.royalties,totalUnits:I.units,totalPageReads:I.pageReads,books:c.books.slice(0,20)}}if(c.dailyHistory.length>0){var J=c.dailyHistory.slice(-30);c.last30Days={totalRoyalties:J.reduce((G,H)=>G+H.royalties,0),totalUnits:J.reduce((G,H)=>G+H.units,0),totalPageReads:J.reduce((G,H)=>G+H.pageReads,0),books:c.books.slice(0,20)}}return c}};window.KDPXLSXParser=KDPXLSXParser;typeof module!="undefined"&&module.exports&&(module.exports=KDPXLSXParser);})();
 </script>
 <style>
@@ -82,7 +82,7 @@ tr:last-child td{border-bottom:none}
 
 <div class="container" style="padding-top:8px">
   <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-    <img src="./extension/icons/icon128.png" alt="Tomos" style="height:20px;width:auto">
+    <svg width="20" height="20" viewBox="0 0 128 128" style="display:inline-block;vertical-align:middle;margin-right:4px"><rect width="128" height="128" rx="16" fill="#2b6cb0"/><text x="64" y="85" text-anchor="middle" fill="white" font-size="72" font-weight="bold" font-family="sans-serif">T</text></svg>
     <span style="font-size:15px;font-weight:700;color:#2b6cb0">Tomos Book Sales</span>
   </div>
 
@@ -184,7 +184,7 @@ tr:last-child td{border-bottom:none}
     </div>
   </div>
 </div>
-<div style="text-align:center;font-size:11px;color:#a0aec0;padding:8px 0 20px">Tomos Book Sales v1.1.0</div>
+<div style="text-align:center;font-size:11px;color:#a0aec0;padding:8px 0 20px">Tomos Book Sales v1.1.1</div>
 <div id="notif"></div>
 
 <script>
