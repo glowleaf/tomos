@@ -228,13 +228,13 @@ function renderHistory(period){
   }else{
     aggregated=days;
   }
-  var entries=period==='30'?aggregated.slice(-30):aggregated;
+  var entries=period==='30'?(hasMonthly?aggregated.slice(-1):aggregated.slice(-30)):aggregated;
   var is30=period==='30';
   var withSales=entries.filter(d=>d.royalties>0);
   var today=withSales.length?withSales[withSales.length-1]:null;
   var yest=withSales.length>1?withSales[withSales.length-2]:null;
   var lR=entries.reduce((s,d)=>s+(d.royalties||0),0),lU=entries.reduce((s,d)=>s+(d.units||0),0),lP=entries.reduce((s,d)=>s+(d.pageReads||0),0);
-  var lbl=is30?(hasMonthly?'30 Months':'30 Days'):'Lifetime';
+  var lbl=is30?(hasMonthly?'Latest Month (~30 days)':'Last 30 Days'):'Lifetime';
   document.getElementById('histAmount').textContent='$'+lR.toFixed(2);
   document.getElementById('histLabel').textContent=lbl;
   document.getElementById('histCount').textContent=books.length;
