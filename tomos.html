@@ -275,6 +275,7 @@ function renderAds(){
     '<div class="stat"><div class="stat-lbl">ROAS</div><div class="stat-val">'+(totalSpend>0?(totalSales/totalSpend).toFixed(2):'0')+'x</div></div>';
   var sorted=[...adsData].sort((a,b)=>b.spend-a.spend);
   document.getElementById('adsBody').innerHTML=sorted.length?sorted.map(a=>'<tr><td><strong>'+esc(a.name)+'</strong></td><td>$'+a.spend.toFixed(2)+'</td><td>$'+a.sales.toFixed(2)+'</td><td>'+(a.spend>0?(a.spend/a.sales*100).toFixed(1):'0')+'%</td><td>'+(a.purchases||0)+'</td></tr>').join(''):'<tr><td colspan="5" class="empty-state">Drop Amazon Ads CSV in Import tab</td></tr>';
+}
 
 function renderToday(){
   var mc=days.filter(d=>d.date&&d.date.length<=7).length;
