@@ -105,6 +105,7 @@ tr:hover td{background:#f7fafc}
 
 <div class="container" id="app">
   <div class="logo-wrap">
+    <img src="extension/icons/icon128.png" alt="Tomos" style="height:32px;width:auto;display:block;margin:0 auto 4px">
     <div class="logo">Tomos Book Sales</div>
   </div>
 
@@ -184,6 +185,7 @@ tr:hover td{background:#f7fafc}
       </div>
       <div class="settings-card">
         <h3>Data Summary</h3>
+        <div class="stat-line"><span>Data Type</span><strong id="sType" style="font-size:11px">—</strong></div>
         <div class="stat-line"><span>Last Updated</span><strong id="sUpdated">—</strong></div>
         <div class="stat-line"><span>Books Tracked</span><strong id="sBooks">0</strong></div>
         <div class="stat-line"><span>Days</span><strong id="sDays">0</strong></div>
@@ -193,7 +195,9 @@ tr:hover td{background:#f7fafc}
         <div class="actions">
           <button id="exportBtn" class="btn btn-sm">Export JSON</button>
           <button id="clearBtn" class="btn btn-sm btn-danger">Clear</button>
+          <button id="debugBtn" class="btn btn-sm">Debug dates</button>
         </div>
+        <pre id="debugOutput" style="display:none;margin-top:8px;background:#1a202c;color:#a0aec0;padding:8px;border-radius:4px;font-size:10px;max-height:300px;overflow-y:auto;white-space:pre-wrap"></pre>
       </div>
     </div>
   </div>
@@ -203,7 +207,7 @@ tr:hover td{background:#f7fafc}
 
 <script>
 // == PARSER ==
-(function(){var K=class KDPXLSXParser{async parseFromFile(b){return this.parse(await b.arrayBuffer())}async parse(b){var c=XLSX.read(new Uint8Array(b),{type:"array"}),d={};c.SheetNames.forEach(e=>{var f=c.Sheets[e];f&&(d[e]=XLSX.utils.sheet_to_json(f,{header:1,defval:""}))});return d}toAppData(b){var c={today:null,thisMonth:null,last30Days:null,dailyHistory:[],books:[],lastUpdated:(new Date).toISOString()},d=new Map,e=new Map;if(b["Combined Sales"]){var f=b["Combined Sales"][0]||[],g=f.findIndex(h=>/date|royalty/i.test(h)),i=f.findIndex(h=>/title/i.test(h)),j=f.findIndex(h=>/asin|isbn/i.test(h)),k=f.findIndex(h=>/^net units|net sold/i.test(h)),l=f.findIndex(h=>/^royalty$/i.test(h));for(let h=1;h<b["Combined Sales"].length;h++){var m=b["Combined Sales"][h],n=g>=0?String(m[g]||"").slice(0,10):"",o=j>=0?String(m[j]||""):"",p=i>=0?String(m[i]||""):"Unknown",q=parseFloat(m[k])||0,r=parseFloat(m[l])||0;if(o&&(r||q)){var s=o;d.has(s)||d.set(s,{asin:o,title:p,royalties:0,units:0,pageReads:0});var t=d.get(s);t.royalties+=r,t.units+=q}if(n&&(r||q)){e.has(n)||e.set(n,{date:n,royalties:0,units:0,pageReads:0});var u=e.get(n);u.royalties+=r,u.units+=q}}}if(b.KENP){var v=b.KENP[0]||[],w=v.findIndex(h=>/date/i.test(h)),x=v.findIndex(h=>/ebook asin|^asin$/i.test(h)),y=v.findIndex(h=>/title/i.test(h)),z=v.findIndex(h=>/kenp|pages|read/i.test(h));for(let h=1;h<b.KENP.length;h++){var A=b.KENP[h],B=w>=0?String(A[w]||"").slice(0,10):"",C=x>=0?String(A[x]||""):"",D=parseFloat(A[z])||0;if(C&&D){var E=C;if(!d.has(E)){var F=y>=0?String(A[y]||""):"";d.set(E,{asin:C,title:F,royalties:0,units:0,pageReads:0})}d.get(E).pageReads+=D}if(B&&D){e.has(B)||e.set(B,{date:B,royalties:0,units:0,pageReads:0});e.get(B).pageReads+=D}}}c.books=Array.from(d.values()).sort((G,H)=>(H.royalties||0)-(G.royalties||0));c.dailyHistory=Array.from(e.values()).sort((G,H)=>(G.date||"").localeCompare(H.date||""));if(c.dailyHistory.length>0){var I=c.dailyHistory[c.dailyHistory.length-1];c.today={date:I.date,totalRoyalties:I.royalties,totalUnits:I.units,totalPageReads:I.pageReads,books:c.books.slice(0,20)}}if(c.dailyHistory.length>0){var J=c.dailyHistory.slice(-30);c.last30Days={totalRoyalties:J.reduce((G,H)=>G+H.royalties,0),totalUnits:J.reduce((G,H)=>G+H.units,0),totalPageReads:J.reduce((G,H)=>G+H.pageReads,0),books:c.books.slice(0,20)}}return c}};window.KDPXLSXParser=K;typeof module!="undefined"&&module.exports&&(module.exports=K);})();
+(function(){var K=class KDPXLSXParser{async parseFromFile(b){return this.parse(await b.arrayBuffer())}async parse(b){var c=XLSX.read(new Uint8Array(b),{type:"array"}),d={};c.SheetNames.forEach(e=>{var f=c.Sheets[e];f&&(d[e]=XLSX.utils.sheet_to_json(f,{header:1,defval:""}))});return d}toAppData(b){var c={today:null,thisMonth:null,last30Days:null,dailyHistory:[],books:[],lastUpdated:(new Date).toISOString()},d=new Map,e=new Map;if(b["Combined Sales"]){var f=b["Combined Sales"][0]||[],g=f.findIndex(h=>/date|royalty/i.test(h)),i=f.findIndex(h=>/title/i.test(h)),j=f.findIndex(h=>/asin|isbn/i.test(h)),k=f.findIndex(h=>/^net units|net sold/i.test(h)),l=f.findIndex(h=>/^royalty$/i.test(h));for(let h=1;h<b["Combined Sales"].length;h++){var m=b["Combined Sales"][h],n=g>=0?String(m[g]||"").slice(0,10):"",o=j>=0?String(m[j]||""):"",p=i>=0?String(m[i]||""):"Unknown",q=parseFloat(m[k])||0,r=parseFloat(m[l])||0;if(o&&(r||q)){var s=o;d.has(s)||d.set(s,{asin:o,title:p,royalties:0,units:0,pageReads:0});var t=d.get(s);t.royalties+=r,t.units+=q}if(n&&(r||q)){e.has(n)||e.set(n,{date:n,royalties:0,units:0,pageReads:0});var u=e.get(n);u.royalties+=r,u.units+=q}}}if(b.KENP){var v=b.KENP[0]||[],w=v.findIndex(h=>/date/i.test(h)),x=v.findIndex(h=>/ebook asin|^asin$/i.test(h)),y=v.findIndex(h=>/title/i.test(h)),z=v.findIndex(h=>/kenp|pages|read/i.test(h));for(let h=1;h<b.KENP.length;h++){var A=b.KENP[h],B=w>=0?String(A[w]||"").slice(0,10):"",C=x>=0?String(A[x]||""):"",D=parseFloat(A[z])||0;if(C&&D){var E=C;if(!d.has(E)){var F=y>=0?String(A[y]||""):"";d.set(E,{asin:C,title:F,royalties:0,units:0,pageReads:0})}d.get(E).pageReads+=D}if(B&&D){e.has(B)||e.set(B,{date:B,royalties:0,units:0,pageReads:0});e.get(B).pageReads+=D}}}c.books=Array.from(d.values()).sort((G,H)=>(H.royalties||0)-(G.royalties||0));c.dailyHistory=Array.from(e.values()).sort((G,H)=>(G.date||"").localeCompare(H.date||""));c.isMonthly=c.dailyHistory.length>0&&c.dailyHistory[0].date&&c.dailyHistory[0].date.length<=7;if(c.dailyHistory.length>0){var I=c.dailyHistory[c.dailyHistory.length-1];c.today={date:I.date,totalRoyalties:I.royalties,totalUnits:I.units,totalPageReads:I.pageReads,books:c.books.slice(0,20)}}if(c.dailyHistory.length>0){var J=c.dailyHistory.slice(-30);c.last30Days={totalRoyalties:J.reduce((G,H)=>G+H.royalties,0),totalUnits:J.reduce((G,H)=>G+H.units,0),totalPageReads:J.reduce((G,H)=>G+H.pageReads,0),books:c.books.slice(0,20)}}return c}};window.KDPXLSXParser=K;typeof module!="undefined"&&module.exports&&(module.exports=K);})();
 
 const KEY='tomos_data';let books=[],days=[],raw={};
 
@@ -322,29 +326,31 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify({...raw,adsData}))}c
 function load(){try{var r=localStorage.getItem(KEY);if(r){var parsed=JSON.parse(r);raw=parsed;books=parsed.books||[];days=parsed.dailyHistory||[];adsData=parsed.adsData||[];renderToday()}}catch(e){}}
 
 function renderToday(){
+  var isMonthly=raw.isMonthly;
   var withSales=days.filter(d=>d.royalties>0);
   var today=withSales.length?withSales[withSales.length-1]:null;
   var yest=withSales.length>1?withSales[withSales.length-2]:null;
-  var last30=days.slice(-30),lR=last30.reduce((s,d)=>s+(d.royalties||0),0),lU=last30.reduce((s,d)=>s+(d.units||0),0),lP=last30.reduce((s,d)=>s+(d.pageReads||0),0);
+  var viewCount=isMonthly?6:30;
+  var viewDays=days.slice(-viewCount),vR=viewDays.reduce((s,d)=>s+(d.royalties||0),0),vU=viewDays.reduce((s,d)=>s+(d.units||0),0),vP=viewDays.reduce((s,d)=>s+(d.pageReads||0),0);
   var allR=days.reduce((s,d)=>s+(d.royalties||0),0),allU=days.reduce((s,d)=>s+(d.units||0),0),allP=days.reduce((s,d)=>s+(d.pageReads||0),0);
-  // This month
   var now=new Date(),thisMonth=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
   var monthDays=days.filter(d=>d.date&&d.date.startsWith(thisMonth));
   var mR=monthDays.reduce((s,d)=>s+(d.royalties||0),0),mU=monthDays.reduce((s,d)=>s+(d.units||0),0),mP=monthDays.reduce((s,d)=>s+(d.pageReads||0),0);
   document.getElementById('todayAmount').textContent=today?'$'+today.royalties.toFixed(2):'$0.00';
-  document.getElementById('todayLabel').textContent=today?'earned on '+fmtD(today.date):'earned today';
+  document.getElementById('todayLabel').textContent=today?'earned '+(isMonthly?'in '+today.date:'on '+fmtD(today.date)):'earned today';
   document.getElementById('todayCount').textContent=books.length;
   document.getElementById('statsRow').innerHTML=
-    '<div class="stat-card"><div class="stat-label">Today</div><div class="stat-value">'+(today?'$'+today.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(today?today.units+' units':'')+'</div></div>'+
-    '<div class="stat-card"><div class="stat-label">Yesterday</div><div class="stat-value">'+(yest?'$'+yest.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(yest?yest.units+' units':'')+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">'+(isMonthly?'Latest Month':'Today')+'</div><div class="stat-value">'+(today?'$'+today.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(today?today.units+' units':'')+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">'+(isMonthly?'Previous Month':'Yesterday')+'</div><div class="stat-value">'+(yest?'$'+yest.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(yest?yest.units+' units':'')+'</div></div>'+
     '<div class="stat-card"><div class="stat-label">This Month ('+now.toLocaleString('en-US',{month:'short'})+')</div><div class="stat-value">$'+mR.toFixed(2)+'</div><div class="stat-sub">'+fmt(mU)+' units</div></div>'+
-    '<div class="stat-card"><div class="stat-label">Last 30 Days</div><div class="stat-value">$'+lR.toFixed(2)+'</div><div class="stat-sub">'+fmt(lU)+' units · '+fmt(lP)+' KENP</div></div>'+
-    '<div class="stat-card"><div class="stat-label">KU Page Reads</div><div class="stat-value">'+fmt(lP)+'</div><div class="stat-sub">last 30 days</div></div>'+
-    '<div class="stat-card"><div class="stat-label">Avg/Unit</div><div class="stat-value">$'+(lU>0?(lR/lU).toFixed(2):'0.00')+'</div><div class="stat-sub">per sale ('+fmt(lU)+' total)</div></div>'+
-    '<div class="stat-card" style="background:#ebf8ff;border-color:#bee3f8"><div class="stat-label">All Time</div><div class="stat-value">$'+allR.toFixed(2)+'</div><div class="stat-sub">'+fmt(allU)+' units · '+fmt(allP)+' KENP · '+days.length+' days</div></div>';
+    '<div class="stat-card"><div class="stat-label">'+(isMonthly?'Last 6 Months':'Last 30 Days')+'</div><div class="stat-value">$'+vR.toFixed(2)+'</div><div class="stat-sub">'+fmt(vU)+' units · '+fmt(vP)+' KENP</div></div>'+
+    '<div class="stat-card"><div class="stat-label">KU Page Reads</div><div class="stat-value">'+fmt(vP)+'</div><div class="stat-sub">'+(isMonthly?'last 6 months':'last 30 days')+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">Avg/Month</div><div class="stat-value">$'+(days.length>0?(allR/days.length).toFixed(2):'0.00')+'</div><div class="stat-sub">per '+(isMonthly?'month':'day')+' ('+fmt(allU/days.length)+' units)</div></div>'+
+    '<div class="stat-card" style="background:#ebf8ff;border-color:#bee3f8"><div class="stat-label">All Time</div><div class="stat-value">$'+allR.toFixed(2)+'</div><div class="stat-sub">'+fmt(allU)+' units · '+fmt(allP)+' KENP · '+days.length+' '+(isMonthly?'months':'days')+'</div></div>';
   books.sort((a,b)=>(b.royalties||0)-(a.royalties||0));
   document.getElementById('topBooks').innerHTML=books.length?books.slice(0,20).map((b,i)=>bookHTML(b,i+1)).join(''):'<div class="empty-state">Drop KDP reports in Settings to start</div>';
-  renderChart(document.getElementById('trendChart'),days.slice(-7),'#4299e1');
+  var chartData=raw.isMonthly?days:days.slice(-7);
+  renderChart(document.getElementById('trendChart'),chartData,'#4299e1',raw.isMonthly);
 }
 
 function bookHTML(b,r){
@@ -359,10 +365,10 @@ function renderHist(){
     '<div class="stat-card"><div class="stat-label">Total Royalties</div><div class="stat-value">$'+tR.toFixed(2)+'</div></div>'+
     '<div class="stat-card"><div class="stat-label">Total Units</div><div class="stat-value">'+fmt(tU)+'</div></div>'+
     '<div class="stat-card"><div class="stat-label">Total KENP</div><div class="stat-value">'+fmt(tP)+'</div></div>'+
-    '<div class="stat-card"><div class="stat-label">Days Tracked</div><div class="stat-value">'+days.length+'</div></div>';
+    '<div class="stat-card"><div class="stat-label">'+(raw.isMonthly?'Months':'Days')+' Tracked</div><div class="stat-value">'+days.length+'</div></div>';
   var sorted=[...days].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-  document.getElementById('historyBody').innerHTML=sorted.length?sorted.map(d=>'<tr><td>'+fmtD(d.date)+'</td><td><strong>$'+(d.royalties||0).toFixed(2)+'</strong></td><td>'+(d.units||0)+'</td><td>'+(d.pageReads||0).toLocaleString()+'</td><td>$'+((d.units||1)>0?((d.royalties||0)/(d.units||1)).toFixed(2):'0.00')+'</td></tr>').join(''):'<tr><td colspan="5" class="empty-state">No data</td></tr>';
-  renderChart(document.getElementById('histChart'),days,'#48bb78');
+  document.getElementById('historyBody').innerHTML=sorted.length?sorted.map(d=>'<tr><td>'+(raw.isMonthly?d.date:fmtD(d.date))+'</td><td><strong>$'+(d.royalties||0).toFixed(2)+'</strong></td><td>'+(d.units||0)+'</td><td>'+(d.pageReads||0).toLocaleString()+'</td><td>$'+((d.units||1)>0?((d.royalties||0)/(d.units||1)).toFixed(2):'0.00')+'</td></tr>').join(''):'<tr><td colspan="5" class="empty-state">No data</td></tr>';
+  renderChart(document.getElementById('histChart'),days,'#48bb78',raw.isMonthly);
 }
 
 function renderSeries(){
@@ -395,10 +401,10 @@ function renderSets(){
   document.getElementById('sDays').textContent=days.length;
   document.getElementById('sTotal').textContent='$'+days.reduce((s,d)=>s+(d.royalties||0),0).toFixed(2);
   document.getElementById('sKENP').textContent=fmt(days.reduce((s,d)=>s+(d.pageReads||0),0));
-  document.getElementById('sLastDays').textContent=days.slice(-5).map(d=>d.date+' $'+d.royalties.toFixed(2)).join(', ');
-}
+  document.getElementById('sLastDays').textContent=days.length?days.slice(-5).map(d=>d.date+' $'+d.royalties.toFixed(2)).join(', '):'—';
+  document.getElementById('sType').textContent=raw.isMonthly?'Monthly summary ('+days.length+' months)':'Daily data ('+days.length+' days)';
 
-function renderChart(canvas,data,color){
+function renderChart(canvas,data,color,isMonthly){
   if(!canvas||!data||data.length<2)return;
   var ctx=canvas.getContext('2d'),rect=canvas.parentElement.getBoundingClientRect(),dpr=window.devicePixelRatio||1;
   canvas.width=rect.width*dpr;canvas.height=rect.height*dpr;canvas.style.width=rect.width+'px';canvas.style.height=rect.height+'px';
