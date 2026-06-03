@@ -288,7 +288,7 @@ function renderToday(){
   var viewN=isMonthly?1:30;
   var lastN=primary.slice(-viewN);
   var lR=lastN.reduce((s,d)=>s+(d.royalties||0),0),lU=lastN.reduce((s,d)=>s+(d.units||0),0),lP=lastN.reduce((s,d)=>s+(d.pageReads||0),0);
-  var allR=primary.reduce((s,d)=>s+(d.royalties||0),0),allU=primary.reduce((s,d)=>s+(d.units||0),0),allP=primary.reduce((s,d)=>s+(d.pageReads||0),0);
+  var allR=days.reduce((s,d)=>s+(d.royalties||0),0),allU=days.reduce((s,d)=>s+(d.units||0),0),allP=days.reduce((s,d)=>s+(d.pageReads||0),0);
   document.getElementById('todayAmount').textContent=today?'$'+today.royalties.toFixed(2):'$0.00';
   document.getElementById('todayLabel').textContent=today?(isMonthly?'earned in '+today.date:'earned on '+fmtD(today.date)):'earned today';
   document.getElementById('todayCount').textContent=books.length;
@@ -321,7 +321,9 @@ function bookHTML(b,r){
 
 function renderPie(data){
   var c=document.getElementById('pieChart');if(!c||!data.length)return;
-  var ctx=c.getContext('2d'),rect=c.parentElement.getBoundingClientRect(),dpr=window.devicePixelRatio||1;
+  var ctx=c.getContext('2d'),rect=c.parentElement.getBoundingClientRect();
+  if(rect.width<10||rect.height<10)return;
+  var dpr=window.devicePixelRatio||1;
   c.width=rect.width*dpr;c.height=rect.height*dpr;c.style.width=rect.width+'px';c.style.height=rect.height+'px';
   ctx.scale(dpr,dpr);ctx.clearRect(0,0,rect.width,rect.height);
   var cx=rect.width/2,cy=rect.height/2-10,r=Math.min(cx,cy)-20,total=data.reduce((s,d)=>s+d.value,0);
@@ -346,7 +348,9 @@ function renderPie(data){
 
 function renderBar(data){
   var c=document.getElementById('barChart');if(!c||!data||data.length<2)return;
-  var ctx=c.getContext('2d'),rect=c.parentElement.getBoundingClientRect(),dpr=window.devicePixelRatio||1;
+  var ctx=c.getContext('2d'),rect=c.parentElement.getBoundingClientRect();
+  if(rect.width<10||rect.height<10)return;
+  var dpr=window.devicePixelRatio||1;
   c.width=rect.width*dpr;c.height=rect.height*dpr;c.style.width=rect.width+'px';c.style.height=rect.height+'px';
   ctx.scale(dpr,dpr);ctx.clearRect(0,0,rect.width,rect.height);
   var sorted=[...data].sort((a,b)=>(a.date||'').localeCompare(b.date||''));
