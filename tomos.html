@@ -216,17 +216,20 @@ function setupTabs(){
   });
 }
 function renderHistory(period){
-  var hasMonthly=days.some(d=>d.date&&d.date.length<=7);
+  var hasMonthly=days.some(d=>d.date&&(d.date.length<=7||/^[A-Z][a-z]+\s+\d{4}$/.test(d.date)));
   var aggregated;
   if(hasMonthly){
     var mMap={};
     days.forEach(d=>{
-      if(d.date&&d.date.length<=7){
-        if(!mMap[d.date])mMap[d.date]={date:d.date,royalties:0,units:0,pageReads:0};
-        mMap[d.date].royalties+=d.royalties||0;
-        mMap[d.date].units+=d.units||0;
-        mMap[d.date].pageReads+=d.pageReads||0;
-      }else if(d.date&&d.date.length>7){
+      var key=d.date&&(d.date.length<=7?d.date:d.date.replace(/^(\w+)\s+(\d{4})/,'$2-'+String('JanFebMarAprMayJunJulAugSepOctNovDec'.indexOf(d.date.slice(0,3))/3+1).padStart(2,'0')));
+      if(d.date&&(d.date.length<=7||/^[A-Z][a-z]+\s+\d{4}$/.test(d.date))){
+        // Monthly entry
+        if(!mMap[key])mMap[key]={date:d.date,royalties:0,units:0,pageReads:0};
+        mMap[key].royalties+=d.royalties||0;
+        mMap[key].units+=d.units||0;
+        mMap[key].pageReads+=d.pageReads||0;
+      }else if(d.date){
+        // Daily entry: add pageReads only
         var m=d.date.slice(0,7);
         if(!mMap[m])mMap[m]={date:m,royalties:0,units:0,pageReads:0};
         mMap[m].pageReads+=d.pageReads||0;
@@ -433,18 +436,18 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify({...raw,adsData}))}c
 function load(){try{var r=localStorage.getItem(KEY);if(r){var p=JSON.parse(r);raw=p;books=p.books||[];days=p.dailyHistory||[];adsData=p.adsData||[];renderToday()}}catch(e){}}
 
 function renderToday(){
-  var hasMonthly=days.some(d=>d.date&&d.date.length<=7);
-  // If monthly data exists, use monthly entries directly + aggregate KENP from daily entries only
+  var hasMonthly=days.some(d=>d.date&&(d.date.length<=7||/^[A-Z][a-z]+\s+\d{4}$/.test(d.date)));
   var use;
   if(hasMonthly){
     var monthlyMap={};
     days.forEach(d=>{
-      if(d.date&&d.date.length<=7){
-        // Monthly CS entry: use directly
-        if(!monthlyMap[d.date])monthlyMap[d.date]={date:d.date,royalties:0,units:0,pageReads:0};
-        monthlyMap[d.date].royalties+=d.royalties||0;
-        monthlyMap[d.date].units+=d.units||0;
-        monthlyMap[d.date].pageReads+=d.pageReads||0;
+      if(d.date&&(d.date.length<=7||/^[A-Z][a-z]+\s+\d{4}$/.test(d.date))){
+        // Monthly entry: use directly
+        var key=d.date.length<=7?d.date:d.date.replace(/^(\w+)\s+(\d{4})/,'$2-'+String('JanFebMarAprMayJunJulAugSepOctNovDec'.indexOf(d.date.slice(0,3))/3+1).padStart(2,'0'));
+        if(!mMap[key])mMap[key]={date:d.date,royalties:0,units:0,pageReads:0};
+        mMap[key].royalties+=d.royalties||0;
+        mMap[key].units+=d.units||0;
+        mMap[key].pageReads+=d.pageReads||0;
       }else if(d.date&&d.date.length>7){
         // Daily KENP entry: add pageReads only (royalties from daily Orders file would double-count)
         var m=d.date.slice(0,7);
@@ -458,6 +461,7 @@ function renderToday(){
   }
   var withSales=use.filter(d=>d.royalties>0);
   var today=withSales.length?withSales[withSales.length-1]:null;
+  var yest=withSales.length>1?withSales[withSales.length-2]:null;
   var yest=withSales.length>1?withSales[withSales.length-2]:null;
   // Last 30 calendar days: find cutoff from all entries (daily or monthly)
   var allDates=days.map(d=>d.date).filter(d=>d).sort();
