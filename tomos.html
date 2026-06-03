@@ -208,14 +208,34 @@ function setupTabs(){
   });
 }
 function renderHistory(period){
-  var entries=period==='30'?days.slice(-30):days;
+  var hasMonthly=days.some(d=>d.date&&d.date.length<=7);
+  var aggregated;
+  if(hasMonthly){
+    var mMap={};
+    days.forEach(d=>{
+      if(d.date&&d.date.length<=7){
+        if(!mMap[d.date])mMap[d.date]={date:d.date,royalties:0,units:0,pageReads:0};
+        mMap[d.date].royalties+=d.royalties||0;
+        mMap[d.date].units+=d.units||0;
+        mMap[d.date].pageReads+=d.pageReads||0;
+      }else if(d.date&&d.date.length>7){
+        var m=d.date.slice(0,7);
+        if(!mMap[m])mMap[m]={date:m,royalties:0,units:0,pageReads:0};
+        mMap[m].pageReads+=d.pageReads||0;
+      }
+    });
+    aggregated=Object.values(mMap).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  }else{
+    aggregated=days;
+  }
+  var entries=period==='30'?aggregated.slice(-30):aggregated;
   var is30=period==='30';
   var withSales=entries.filter(d=>d.royalties>0);
   var today=withSales.length?withSales[withSales.length-1]:null;
   var yest=withSales.length>1?withSales[withSales.length-2]:null;
   var lR=entries.reduce((s,d)=>s+(d.royalties||0),0),lU=entries.reduce((s,d)=>s+(d.units||0),0),lP=entries.reduce((s,d)=>s+(d.pageReads||0),0);
-  document.getElementById('histAmount').textContent=today?'$'+today.royalties.toFixed(2):'$0.00';
-  document.getElementById('histLabel').textContent=is30?'earned on '+fmtD(today?.date||''):'earned across all time';
+  document.getElementById('histAmount').textContent='$'+lR.toFixed(2);
+  document.getElementById('histLabel').textContent=is30?'earned in last 30 days':'earned across all time';
   document.getElementById('histCount').textContent=books.length;
   document.getElementById('histStats').innerHTML=
     '<div class="stat"><div class="stat-lbl">'+(is30?'Today':'Latest')+'</div><div class="stat-val">'+(today?'$'+today.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(today?today.units+' units':'')+'</div></div>'+
