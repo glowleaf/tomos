@@ -244,7 +244,8 @@ function renderHistory(period){
   var latestDate=allDates[allDates.length-1];
   var cutoffDate=is30&&latestDate?getCutoff(latestDate):'';
   var cutoffMonth=cutoffDate?cutoffDate.slice(0,7):'';
-  var entries=cutoffDate?aggregated.filter(d=>d.date>=(d.date.length<=7?cutoffMonth:cutoffDate)):aggregated;
+  function normDate(d){return d&&/^[A-Z][a-z]+\s+\d{4}$/.test(d)?d.replace(/^(\w+)\s+(\d{4})/,'$2-'+String('JanFebMarAprMayJunJulAugSepOctNovDec'.indexOf(d.slice(0,3))/3+1).padStart(2,'0')):d;}
+  var entries=cutoffDate?aggregated.filter(d=>normDate(d.date)>=(d.date.length<=7?cutoffMonth:cutoffDate)):aggregated;
   var withSales=entries.filter(d=>d.royalties>0);
   var today=withSales.length?withSales[withSales.length-1]:null;
   var yest=withSales.length>1?withSales[withSales.length-2]:null;
@@ -294,7 +295,8 @@ function renderAds(period){
     var allD=days.map(d=>d.date).filter(d=>d).sort(),latest=allD[allD.length-1];
     if(latest){
       var cut=getCutoff(latest),cutM=cut.slice(0,7);
-      var entries=days.filter(d=>d.date>=(d.date.length<=7?cutM:cut));
+      function nd(d){return d&&/^[A-Z][a-z]+\s+\d{4}$/.test(d)?d.replace(/^(\w+)\s+(\d{4})/,'$2-'+String('JanFebMarAprMayJunJulAugSepOctNovDec'.indexOf(d.slice(0,3))/3+1).padStart(2,'0')):d;}
+      var entries=days.filter(d=>nd(d.date)>=(d.date.length<=7?cutM:cut));
       bookSales30=entries.reduce((s,d)=>s+(d.royalties||0),0);
     }
   }catch(e){}
@@ -468,7 +470,8 @@ function renderToday(){
   var latestDate=allDates[allDates.length-1];
   var cutoffDate=latestDate?getCutoff(latestDate):'';
   var cutoffMonth=cutoffDate?cutoffDate.slice(0,7):'';
-  var viewEntries=cutoffDate?use.filter(d=>d.date>=(d.date.length<=7?cutoffMonth:cutoffDate)):use;
+  function normDate(d){return d&&/^[A-Z][a-z]+\s+\d{4}$/.test(d)?d.replace(/^(\w+)\s+(\d{4})/,'$2-'+String('JanFebMarAprMayJunJulAugSepOctNovDec'.indexOf(d.slice(0,3))/3+1).padStart(2,'0')):d;}
+  var viewEntries=cutoffDate?use.filter(d=>normDate(d.date)>=(d.date.length<=7?cutoffMonth:cutoffDate)):use;
   var lR=viewEntries.reduce((s,d)=>s+(d.royalties||0),0),lU=viewEntries.reduce((s,d)=>s+(d.units||0),0),lP=viewEntries.reduce((s,d)=>s+(d.pageReads||0),0);
   var allR=use.reduce((s,d)=>s+(d.royalties||0),0),allU=use.reduce((s,d)=>s+(d.units||0),0),allP=use.reduce((s,d)=>s+(d.pageReads||0),0);
   document.getElementById('todayAmount').textContent=today?'$'+today.royalties.toFixed(2):'$0.00';
