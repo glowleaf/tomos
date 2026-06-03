@@ -189,6 +189,7 @@ tr:hover td{background:#f7fafc}
         <div class="stat-line"><span>Days</span><strong id="sDays">0</strong></div>
         <div class="stat-line"><span>Total Sales</span><strong id="sTotal">$0.00</strong></div>
         <div class="stat-line"><span>Total KENP</span><strong id="sKENP">0</strong></div>
+        <div class="stat-line"><span>Last 5 days</span><strong id="sLastDays" style="font-size:11px;max-width:180px;text-align:right">—</strong></div>
         <div class="actions">
           <button id="exportBtn" class="btn btn-sm">Export JSON</button>
           <button id="clearBtn" class="btn btn-sm btn-danger">Clear</button>
@@ -325,6 +326,7 @@ function renderToday(){
   var today=withSales.length?withSales[withSales.length-1]:null;
   var yest=withSales.length>1?withSales[withSales.length-2]:null;
   var last30=days.slice(-30),lR=last30.reduce((s,d)=>s+(d.royalties||0),0),lU=last30.reduce((s,d)=>s+(d.units||0),0),lP=last30.reduce((s,d)=>s+(d.pageReads||0),0);
+  var allR=days.reduce((s,d)=>s+(d.royalties||0),0),allU=days.reduce((s,d)=>s+(d.units||0),0),allP=days.reduce((s,d)=>s+(d.pageReads||0),0);
   // This month
   var now=new Date(),thisMonth=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
   var monthDays=days.filter(d=>d.date&&d.date.startsWith(thisMonth));
@@ -338,7 +340,8 @@ function renderToday(){
     '<div class="stat-card"><div class="stat-label">This Month ('+now.toLocaleString('en-US',{month:'short'})+')</div><div class="stat-value">$'+mR.toFixed(2)+'</div><div class="stat-sub">'+fmt(mU)+' units</div></div>'+
     '<div class="stat-card"><div class="stat-label">Last 30 Days</div><div class="stat-value">$'+lR.toFixed(2)+'</div><div class="stat-sub">'+fmt(lU)+' units · '+fmt(lP)+' KENP</div></div>'+
     '<div class="stat-card"><div class="stat-label">KU Page Reads</div><div class="stat-value">'+fmt(lP)+'</div><div class="stat-sub">last 30 days</div></div>'+
-    '<div class="stat-card"><div class="stat-label">Avg/Unit</div><div class="stat-value">$'+(lU>0?(lR/lU).toFixed(2):'0.00')+'</div><div class="stat-sub">per sale ('+fmt(lU)+' total)</div></div>';
+    '<div class="stat-card"><div class="stat-label">Avg/Unit</div><div class="stat-value">$'+(lU>0?(lR/lU).toFixed(2):'0.00')+'</div><div class="stat-sub">per sale ('+fmt(lU)+' total)</div></div>'+
+    '<div class="stat-card" style="background:#ebf8ff;border-color:#bee3f8"><div class="stat-label">All Time</div><div class="stat-value">$'+allR.toFixed(2)+'</div><div class="stat-sub">'+fmt(allU)+' units · '+fmt(allP)+' KENP · '+days.length+' days</div></div>';
   books.sort((a,b)=>(b.royalties||0)-(a.royalties||0));
   document.getElementById('topBooks').innerHTML=books.length?books.slice(0,20).map((b,i)=>bookHTML(b,i+1)).join(''):'<div class="empty-state">Drop KDP reports in Settings to start</div>';
   renderChart(document.getElementById('trendChart'),days.slice(-7),'#4299e1');
@@ -392,6 +395,7 @@ function renderSets(){
   document.getElementById('sDays').textContent=days.length;
   document.getElementById('sTotal').textContent='$'+days.reduce((s,d)=>s+(d.royalties||0),0).toFixed(2);
   document.getElementById('sKENP').textContent=fmt(days.reduce((s,d)=>s+(d.pageReads||0),0));
+  document.getElementById('sLastDays').textContent=days.slice(-5).map(d=>d.date+' $'+d.royalties.toFixed(2)).join(', ');
 }
 
 function renderChart(canvas,data,color){
