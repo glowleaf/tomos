@@ -240,7 +240,7 @@ function renderHistory(period){
     aggregated=days;
   }
   var is30=period==='30';
-  var allDates=days.map(d=>d.date).filter(d=>d).sort();
+  var allDates=days&&days.length?days.map(d=>d.date).filter(d=>d).sort():[];
   var latestDate=allDates[allDates.length-1];
   var cutoffDate=is30&&latestDate?getCutoff(latestDate):'';
   var cutoffMonth=cutoffDate?cutoffDate.slice(0,7):'';
@@ -466,7 +466,7 @@ function renderToday(){
   var yest=withSales.length>1?withSales[withSales.length-2]:null;
   var yest=withSales.length>1?withSales[withSales.length-2]:null;
   // Last 30 calendar days: find cutoff from all entries (daily or monthly)
-  var allDates=days.map(d=>d.date).filter(d=>d).sort();
+  var allDates=days&&days.length?days.map(d=>d.date).filter(d=>d).sort():[];
   var latestDate=allDates[allDates.length-1];
   var cutoffDate=latestDate?getCutoff(latestDate):'';
   var cutoffMonth=cutoffDate?cutoffDate.slice(0,7):'';
