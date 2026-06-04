@@ -1,4 +1,4 @@
-# Tomos Book Sales
+# Tomos Sales Dashboard
 
 A standalone HTML dashboard for Amazon KDP sales data. Drop your KDP export files — everything parses locally in your browser. No data is ever uploaded to any server.
 
