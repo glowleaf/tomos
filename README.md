@@ -1,51 +1,55 @@
-# Tomos Sales Dashboard
+# Tomos
 
-A standalone HTML dashboard for Amazon KDP sales data. Drop your KDP export files — everything parses locally in your browser. No data is ever uploaded to any server.
+AI-powered book production tools. Built for [OpenCode](https://georgesaoulidis.com/opencodedownload).
 
-**[Live Demo](https://tomos.georgesaoulidis.com/sales.html)**
+[**tomos.georgesaoulidis.com**](https://tomos.georgesaoulidis.com/)
 
-## Features
+## What's in this repo
 
-- **Today tab**: Latest sales with hero stats, pie chart, bar chart, top books
-- **History tab**: 30-day / 90-day / Lifetime views with charts and book rankings per period
-- **KU estimates**: Estimated KENP royalties at ~$0.00335/page, shown separately and combined with confirmed sales
-- **Ads tab**: Import Amazon Campaign CSV with spend, sales, ROAS, net profit
-- **Books tab**: Full catalog with search and sort
-- **Import tab**: Drop KDP Orders XLSX, KENP Read XLSX, or Ads CSV — auto-routes to the right parser
-- **Privacy**: All processing client-side via File API. Data stays in your browser's localStorage. Download the HTML to run fully offline.
+- **Tomos Writing** — EPUB production, GitHub backups, and publishing tools for OpenCode ([opencode.json](opencode.json))
+- **Tomos Sales Dashboard** — A standalone HTML dashboard for Amazon KDP sales data ([sales.html](sales.html))
 
-## Usage
+---
+
+## Sales Dashboard
+
+Drop your KDP export files — everything parses locally. No data uploaded.
+
+**[Open Dashboard →](https://tomos.georgesaoulidis.com/sales.html)**
+
+### Features
+
+- **Today tab**: Latest sales with pie chart, bar chart, top books
+- **History tab**: 30-day / 90-day / Lifetime views with KU estimates
+- **Ads tab**: Amazon Campaign CSV import with ROAS and profit
+- **Books tab**: Full book catalog with search and sort
+- **KU estimates** at ~$0.00335/page, combined with confirmed sales
+- **Privacy**: All client-side via File API. Data stays in your browser. [Download the HTML](https://raw.githubusercontent.com/glowleaf/tomos/master/tomos.html) to run offline.
+
+### Usage
 
 1. Go to [KDP Reports](https://kdpreports.amazon.com/dashboard)
-2. Download the **Orders** report (90-day range) and **KENP Read** report (90-day range)
+2. Download **Orders** report (90-day) and **KENP Read** report (90-day)
 3. Open `sales.html` in Chrome
-4. Drop both `.xlsx` files on the Import tab
-5. Also drop your Amazon Ads CSV if you have one
+4. Drop both files on Import tab
 
-Or upload to any static host (Netlify, GitHub Pages, S3, etc.) — no backend needed. Just upload `sales.html` and the `extension/` folder.
+Upload `sales.html` and the `extension/` folder to any static host — no backend needed.
 
-## How It Works
+---
 
-- **Combined Sales** sheet → per-transaction royalties and units, aggregated by date and ASIN
-- **KENP Read** sheet → daily page reads, aggregated into monthly totals
-- KU estimated royalties at ~$0.00335/page are added to confirmed sales for the total
-- Overlapping daily/monthly exports are normalized on import — monthly entries supersede daily entries for the same period
+## Writing Tools
 
-## File Structure
+The [opencode.json](opencode.json) file adds Tomos skills to [OpenCode](https://georgesaoulidis.com/opencodedownload):
 
-```
-sales.html              - Main dashboard
-extension/
-  lib/
-    xlsx.full.min.js    - SheetJS (Excel parsing)
-    xlsx-parser.js      - KDP XLSX → app data converter
-  icons/
-    icon128.png         - Logo
-favicon.ico             - Browser tab icon
-```
+- **EPUB production** — Build EPUBs from chapter files with proper metadata and TOC
+- **Smashwords-compliant** — Passes Premium Catalog requirements
+- **GitHub backup** — One-command backup to GitHub
+- **Facebook community**: [facebook.com/groups/1297149265881814](https://www.facebook.com/groups/1297149265881814)
 
-## Version
+### Install
 
-v1.5.1
+Download `opencode.json` and place it in your book folder. Open OpenCode and point it to that folder.
+
+---
 
 Built by [George Saoulidis](https://georgesaoulidis.com)
