@@ -501,8 +501,9 @@ function renderToday(){
   document.getElementById('stats').innerHTML=
     '<div class="stat"><div class="stat-lbl">'+(hasMonthly?'Latest Month':'Today')+'</div><div class="stat-val">'+(today?'$'+today.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(today?today.units+' units':'')+'</div></div>'+
     '<div class="stat"><div class="stat-lbl">'+(hasMonthly?'Prev Month':'Yesterday')+'</div><div class="stat-val">'+(yest?'$'+yest.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(yest?yest.units+' units':'')+'</div></div>'+
-    '<div class="stat"><div class="stat-lbl">'+(hasMonthly?'This Month (~30 days)':'Last 30 Days')+'</div><div class="stat-val">$'+lR.toFixed(2)+'</div><div class="stat-sub">'+fmt(lU)+' units ~ '+fmt(lP)+' KENP ('+kenp$(lP)+')</div></div>'+
-    '<div class="stat"><div class="stat-lbl">KU Pages <span style="cursor:help;font-size:9px;color:#a0aec0" title="Kindle Edition Normalized Pages. KENP royalties depend on the monthly KDP Select Global Fund (~$67.7M in Apr 2026) divided by total pages read across all KU authors. The per-page rate varies. ~$0.0043 is a rough average only. See KDP Reports > Prior Months Royalties for actual figures.">?</span></div><div class="stat-val">'+fmt(lP)+'</div><div class="stat-sub">'+kenp$(lP)+'</div></div>'+
+    '<div class="stat"><div class="stat-lbl">'+(hasMonthly?'This Month (~30 days)':'Last 30 Days')+'</div><div class="stat-val">$'+lR.toFixed(2)+'</div><div class="stat-sub">'+fmt(lU)+' units</div></div>'+
+    '<div class="stat"><div class="stat-lbl">Total KENP</div><div class="stat-val">'+fmt(lP)+'</div><div class="stat-sub">pages read</div></div>'+
+    '<div class="stat"><div class="stat-lbl">KU Estimated</div><div class="stat-val">'+kenp$(lP)+'</div><div class="stat-sub">at ~$0.0043/page</div></div>'+
     '<div class="stat"><div class="stat-lbl">Avg/Unit</div><div class="stat-val">$'+(lU>0?(lR/lU).toFixed(2):'0.00')+'</div><div class="stat-sub">per sale</div></div>'+
     '<div class="stat"><div class="stat-lbl">All Time</div><div class="stat-val">$'+allR.toFixed(2)+'</div><div class="stat-sub">'+fmt(allU)+' units ~ '+fmt(allP)+' KENP ('+kenp$(allP)+')</div></div>';
   
