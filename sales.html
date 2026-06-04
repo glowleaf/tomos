@@ -116,11 +116,10 @@ tr:last-child td{border-bottom:none}
   <div id="tab-history" class="tab-pane">
     <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
       <button id="period30" class="btn" style="background:#4299e1;color:#fff;border-color:#4299e1;font-weight:600">30 Days</button>
-      <button id="period60" class="btn">60 Days</button>
       <button id="period90" class="btn">90 Days</button>
       <button id="periodLifetime" class="btn">Lifetime</button>
     </div>
-    <div style="font-size:11px;color:#d97706;background:#fffbeb;padding:8px 12px;border-radius:6px;margin-bottom:12px">⚠ Sales data from XLSX exports is based on processed transactions only. Pending/unfinalized sales may not appear. Check KDP Reports directly for the most up-to-date figures.</div>
+    <div style="font-size:11px;color:#d97706;background:#fffbeb;padding:8px 12px;border-radius:6px;margin-bottom:12px">⚠ The 30-day view may undercount because recent sales might not have finalized yet. The <strong>90-day report</strong> includes more finalized data and is more accurate for totals.</div>
     <div class="text-center">
       <div class="hero-amount" id="histAmount">$0.00</div>
       <div class="hero-label" id="histLabel">earned</div>
@@ -164,7 +163,12 @@ tr:last-child td{border-bottom:none}
     <div class="settings-grid">
       <div class="settings-card">
         <h3>Import KDP Reports</h3>
-        <p>Drop <code>KDP_Dashboard-*.xlsx</code> or <code>KDP_Orders-*.xlsx</code> from <a href="https://kdpreports.amazon.com/dashboard" target="_blank">KDP Reports</a>.</p>
+        <p>Download your <strong>90-day reports</strong> from <a href="https://kdpreports.amazon.com/dashboard" target="_blank">KDP Reports</a>:</p>
+        <ol style="font-size:13px;color:#4a5568;line-height:1.8;margin:8px 0 12px 20px">
+          <li><strong>Orders</strong> report — set date range to <strong>90 days</strong>, click Download</li>
+          <li><strong>KENP Read</strong> report — set date range to <strong>90 days</strong>, click Download</li>
+        </ol>
+        <p style="font-size:12px;color:#4a5568;padding:8px;background:#f7fafc;border-radius:6px;line-height:1.5">Drop both <code>.xlsx</code> files here. The dashboard merges them automatically for accurate totals.</p>
         <p style="font-size:12px;color:#4a5568;margin-top:8px;padding:8px;background:#f7fafc;border-radius:6px;line-height:1.5"><strong>Privacy:</strong> Your data stays on your device. Files are read locally and never uploaded. Data persists only in your browser's localStorage. <a href="https://raw.githubusercontent.com/glowleaf/tomos/master/tomos.html" target="_blank">Download the HTML</a> to run fully offline.</p>
         <div id="dropZone" class="drop-zone">
           <div class="dz-icon">↓</div>
@@ -341,13 +345,12 @@ function setupActions(){
   // Period toggles
   function histPeriod(p){
     renderHistory(p);
-    ['period30','period60','period90','periodLifetime'].forEach(id=>{
+    ['period30','period90','periodLifetime'].forEach(id=>{
       var b=document.getElementById(id);
       if(b){b.style.background=id==='period'+p?'#4299e1':'#fff';b.style.color=id==='period'+p?'#fff':'#4a5568';b.style.borderColor=id==='period'+p?'#4299e1':'#e2e8f0';b.style.fontWeight=id==='period'+p?'600':'400'}
     });
   }
   try{document.getElementById('period30').addEventListener('click',function(){histPeriod('30')})}catch(e){}
-  try{document.getElementById('period60').addEventListener('click',function(){histPeriod('60')})}catch(e){}
   try{document.getElementById('period90').addEventListener('click',function(){histPeriod('90')})}catch(e){}
   try{document.getElementById('periodLifetime').addEventListener('click',function(){histPeriod('lifetime')})}catch(e){}
   try{document.getElementById('ads30').addEventListener('click',function(){renderAds('30');togglePeriod('ads30','adsLifetime')})}catch(e){}
@@ -642,7 +645,7 @@ function doClear(){
 }
 
 function fmt(n){if(n==null||isNaN(n))return'0';if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return n.toLocaleString()}
-function kenp$(p){return '~$'+(p*0.0032).toFixed(0)}
+function kenp$(p){return '~$'+(p*0.00335).toFixed(0)}
 function fmtD(d){if(!d)return'';try{return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}catch{return d}}
 function esc(s){if(!s)return'';var d=document.createElement('div');d.textContent=s;return d.innerHTML}
 function n(m){var e=document.getElementById('notif');e.textContent=m;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),2500)}
