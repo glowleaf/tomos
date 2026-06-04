@@ -114,10 +114,13 @@ tr:last-child td{border-bottom:none}
 
   <!-- HISTORY -->
   <div id="tab-history" class="tab-pane">
-    <div style="display:flex;gap:8px;margin-bottom:16px">
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
       <button id="period30" class="btn" style="background:#4299e1;color:#fff;border-color:#4299e1;font-weight:600">30 Days</button>
+      <button id="period60" class="btn">60 Days</button>
+      <button id="period90" class="btn">90 Days</button>
       <button id="periodLifetime" class="btn">Lifetime</button>
     </div>
+    <div style="font-size:11px;color:#d97706;background:#fffbeb;padding:8px 12px;border-radius:6px;margin-bottom:12px">⚠ Sales data from XLSX exports is based on processed transactions only. Pending/unfinalized sales may not appear. Check KDP Reports directly for the most up-to-date figures.</div>
     <div class="text-center">
       <div class="hero-amount" id="histAmount">$0.00</div>
       <div class="hero-label" id="histLabel">earned</div>
@@ -243,10 +246,10 @@ function renderHistory(period){
   }else{
     aggregated=days;
   }
-  var is30=period==='30';
+  var daysBack=period==='30'?30:period==='60'?60:period==='90'?90:0;
   var allDates=days&&days.length?days.map(d=>d.date).filter(d=>d).sort():[];
   var latestDate=allDates[allDates.length-1];
-  var cutoffDate=is30&&latestDate?getCutoff(latestDate):'';
+  var cutoffDate=daysBack&&latestDate?getCutoff(latestDate,daysBack):'';
   var cutoffMonth=cutoffDate?cutoffDate.slice(0,7):'';
   function normDate(d){return d&&/^[A-Z][a-z]+\s+\d{4}$/.test(d)?d.replace(/^(\w+)\s+(\d{4})/,'$2-'+String('JanFebMarAprMayJunJulAugSepOctNovDec'.indexOf(d.slice(0,3))/3+1).padStart(2,'0')):d;}
   var entries=cutoffDate?aggregated.filter(d=>normDate(d.date)>=(d.date.length<=7?cutoffMonth:cutoffDate)):aggregated;
@@ -254,19 +257,20 @@ function renderHistory(period){
   var today=withSales.length?withSales[withSales.length-1]:null;
   var yest=withSales.length>1?withSales[withSales.length-2]:null;
   var lR=entries.reduce((s,d)=>s+(d.royalties||0),0),lU=entries.reduce((s,d)=>s+(d.units||0),0),lP=entries.reduce((s,d)=>s+(d.pageReads||0),0);
-  var lbl=is30?(hasMonthly?'Latest Month (~30 days)':'Last 30 Days'):'Lifetime';
+  var lbl=daysBack?(hasMonthly?daysBack+' Months':'Last '+daysBack+' Days'):'Lifetime';
+  var periodName=daysBack?daysBack+' days':'\u221e';
   document.getElementById('histAmount').textContent='$'+lR.toFixed(2);
   document.getElementById('histLabel').textContent=lbl;
   document.getElementById('histCount').textContent=books.length;
   document.getElementById('histStats').innerHTML=
-    '<div class="stat"><div class="stat-lbl">'+(is30?'Today':'Latest')+'</div><div class="stat-val">'+(today?'$'+today.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(today?today.units+' units':'')+'</div></div>'+
-    '<div class="stat"><div class="stat-lbl">'+(is30?'Yesterday':'Previous')+'</div><div class="stat-val">'+(yest?'$'+yest.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(yest?yest.units+' units':'')+'</div></div>'+
-    '<div class="stat"><div class="stat-lbl">'+(is30?'Last 30 Days':'Lifetime')+'</div><div class="stat-val">$'+lR.toFixed(2)+'</div><div class="stat-sub">'+fmt(lU)+' units ~ '+fmt(lP)+' KENP</div></div>'+
+    '<div class="stat"><div class="stat-lbl">'+(daysBack?'Today':'Latest')+'</div><div class="stat-val">'+(today?'$'+today.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(today?today.units+' units':'')+'</div></div>'+
+    '<div class="stat"><div class="stat-lbl">'+(daysBack?'Yesterday':'Previous')+'</div><div class="stat-val">'+(yest?'$'+yest.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(yest?yest.units+' units':'')+'</div></div>'+
+    '<div class="stat"><div class="stat-lbl">'+lbl+'</div><div class="stat-val">$'+lR.toFixed(2)+'</div><div class="stat-sub">'+fmt(lU)+' units ~ '+fmt(lP)+' KENP</div></div>'+
     '<div class="stat"><div class="stat-lbl">KU Pages</div><div class="stat-val">'+fmt(lP)+'</div><div class="stat-sub">'+kenp$(lP)+'</div></div>'+
     '<div class="stat"><div class="stat-lbl">Avg/Unit</div><div class="stat-val">$'+(lU>0?(lR/lU).toFixed(2):'0.00')+'</div><div class="stat-sub">per sale</div></div>'+
-    '<div class="stat"><div class="stat-lbl">Entries</div><div class="stat-val">'+entries.length+'</div><div class="stat-sub">'+(is30?'days':'months/days')+'</div></div>';
+    '<div class="stat"><div class="stat-lbl">Entries</div><div class="stat-val">'+entries.length+'</div><div class="stat-sub">'+periodName+'</div></div>';
   // Books for period
-  var topBks=is30?(raw.top30Books||[]):([...books].sort((a,b)=>(b.royalties||0)-(a.royalties||0)));
+  var topBks=daysBack?raw.top30Books||[]:([...books].sort((a,b)=>(b.royalties||0)-(a.royalties||0)));
   document.getElementById('histBooks').innerHTML=topBks.length?topBks.slice(0,20).map((b,i)=>bookHTML(b,i+1)).join(''):'<div class="empty-state">No data</div>';
   // Pie
   var top5=topBks.slice(0,5),otherR=top5.slice(5).reduce((s,b)=>s+(b.royalties||0),0);
@@ -298,7 +302,7 @@ function renderAds(period){
   try{
     var allD=days.map(d=>d.date).filter(d=>d).sort(),latest=allD[allD.length-1];
     if(latest){
-      var cut=getCutoff(latest),cutM=cut.slice(0,7);
+      var cut=getCutoff(latest,30),cutM=cut.slice(0,7);
       function nd(d){return d&&/^[A-Z][a-z]+\s+\d{4}$/.test(d)?d.replace(/^(\w+)\s+(\d{4})/,'$2-'+String('JanFebMarAprMayJunJulAugSepOctNovDec'.indexOf(d.slice(0,3))/3+1).padStart(2,'0')):d;}
       var entries=days.filter(d=>nd(d.date)>=(d.date.length<=7?cutM:cut));
       bookSales30=entries.reduce((s,d)=>s+(d.royalties||0),0);
@@ -335,8 +339,17 @@ function setupActions(){
   document.getElementById('bookSearch').addEventListener('input',renderBooks);
   document.getElementById('bookSort').addEventListener('change',renderBooks);
   // Period toggles
-  try{document.getElementById('period30').addEventListener('click',function(){renderHistory('30');togglePeriod('period30','periodLifetime')})}catch(e){}
-  try{document.getElementById('periodLifetime').addEventListener('click',function(){renderHistory('lifetime');togglePeriod('periodLifetime','period30')})}catch(e){}
+  function histPeriod(p){
+    renderHistory(p);
+    ['period30','period60','period90','periodLifetime'].forEach(id=>{
+      var b=document.getElementById(id);
+      if(b){b.style.background=id==='period'+p?'#4299e1':'#fff';b.style.color=id==='period'+p?'#fff':'#4a5568';b.style.borderColor=id==='period'+p?'#4299e1':'#e2e8f0';b.style.fontWeight=id==='period'+p?'600':'400'}
+    });
+  }
+  try{document.getElementById('period30').addEventListener('click',function(){histPeriod('30')})}catch(e){}
+  try{document.getElementById('period60').addEventListener('click',function(){histPeriod('60')})}catch(e){}
+  try{document.getElementById('period90').addEventListener('click',function(){histPeriod('90')})}catch(e){}
+  try{document.getElementById('periodLifetime').addEventListener('click',function(){histPeriod('lifetime')})}catch(e){}
   try{document.getElementById('ads30').addEventListener('click',function(){renderAds('30');togglePeriod('ads30','adsLifetime')})}catch(e){}
   try{document.getElementById('adsLifetime').addEventListener('click',function(){renderAds('lifetime');togglePeriod('adsLifetime','ads30')})}catch(e){}
 }
@@ -501,7 +514,6 @@ function renderToday(){
   var withSales=use.filter(d=>d.royalties>0);
   var today=withSales.length?withSales[withSales.length-1]:null;
   var yest=withSales.length>1?withSales[withSales.length-2]:null;
-  var yest=withSales.length>1?withSales[withSales.length-2]:null;
   // Last 30 calendar days: find cutoff from all entries (daily or monthly)
   var allDates=days&&days.length?days.map(d=>d.date).filter(d=>d).sort():[];
   var latestDate=allDates[allDates.length-1];
@@ -634,15 +646,13 @@ function kenp$(p){return '~$'+(p*0.0032).toFixed(0)}
 function fmtD(d){if(!d)return'';try{return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}catch{return d}}
 function esc(s){if(!s)return'';var d=document.createElement('div');d.textContent=s;return d.innerHTML}
 function n(m){var e=document.getElementById('notif');e.textContent=m;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),2500)}
-function getCutoff(latest){
-  // For daily dates (len>7): subtract 30 days, return YYYY-MM-DD
-  // For monthly dates (len<=7): return YYYY-MM for month containing latest-30days
+function getCutoff(latest,days){
+  days=days||30;
   if(latest.length<=7){
-    // Monthly date: return the month that starts 30 days before month start
-    var d=new Date(latest+'-01');d.setDate(d.getDate()-30);
+    var d=new Date(latest+'-01');d.setDate(d.getDate()-days);
     return d.toISOString().slice(0,7);
   }
-  var d=new Date(latest);d.setDate(d.getDate()-30);
+  var d=new Date(latest);d.setDate(d.getDate()-days);
   return d.toISOString().slice(0,10);
 }
 </script>
