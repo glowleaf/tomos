@@ -261,7 +261,7 @@ function renderHistory(period){
   document.getElementById('histStats').innerHTML=
     '<div class="stat"><div class="stat-lbl">'+(is30?'Today':'Latest')+'</div><div class="stat-val">'+(today?'$'+today.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(today?today.units+' units':'')+'</div></div>'+
     '<div class="stat"><div class="stat-lbl">'+(is30?'Yesterday':'Previous')+'</div><div class="stat-val">'+(yest?'$'+yest.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(yest?yest.units+' units':'')+'</div></div>'+
-    '<div class="stat"><div class="stat-lbl">'+(is30?'Last 30 Days':'Lifetime')+'</div><div class="stat-val">$'+lR.toFixed(2)+'</div><div class="stat-sub">'+fmt(lU)+' units ~ '+fmt(lP)+' KENP ('+kenp$(lP)+')</div></div>'+
+    '<div class="stat"><div class="stat-lbl">'+(is30?'Last 30 Days':'Lifetime')+'</div><div class="stat-val">$'+lR.toFixed(2)+'</div><div class="stat-sub">'+fmt(lU)+' units ~ '+fmt(lP)+' KENP</div></div>'+
     '<div class="stat"><div class="stat-lbl">KU Pages</div><div class="stat-val">'+fmt(lP)+'</div><div class="stat-sub">'+kenp$(lP)+'</div></div>'+
     '<div class="stat"><div class="stat-lbl">Avg/Unit</div><div class="stat-val">$'+(lU>0?(lR/lU).toFixed(2):'0.00')+'</div><div class="stat-sub">per sale</div></div>'+
     '<div class="stat"><div class="stat-lbl">Entries</div><div class="stat-val">'+entries.length+'</div><div class="stat-sub">'+(is30?'days':'months/days')+'</div></div>';
@@ -613,7 +613,7 @@ function doClear(){
 }
 
 function fmt(n){if(n==null||isNaN(n))return'0';if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return n.toLocaleString()}
-function kenp$(p){return '~$'+(p*0.0043).toFixed(0)}
+function kenp$(p){return ''}
 function fmtD(d){if(!d)return'';try{return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}catch{return d}}
 function esc(s){if(!s)return'';var d=document.createElement('div');d.textContent=s;return d.innerHTML}
 function n(m){var e=document.getElementById('notif');e.textContent=m;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),2500)}
