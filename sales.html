@@ -451,7 +451,21 @@ async function importXLSX(file){
 
 function merge(a){
   (a.books||[]).forEach(b=>{var k=b.asin||b.title,e=books.find(x=>(x.asin||x.title)===k);if(e){e.royalties=Math.max(e.royalties||0,b.royalties||0);e.units=Math.max(e.units||0,b.units||0);e.pageReads=Math.max(e.pageReads||0,b.pageReads||0)}else books.push({...b})});
-  (a.dailyHistory||[]).forEach(d=>{var e=days.find(x=>x.date===d.date);if(e){e.royalties=Math.max(e.royalties||0,d.royalties||0);e.units=Math.max(e.units||0,d.units||0);e.pageReads=Math.max(e.pageReads||0,d.pageReads||0)}else days.push({...d})});
+  (a.dailyHistory||[]).forEach(d=>{
+    var isMonthly=d.date&&d.date.length<=7;
+    var m=isMonthly?d.date:d.date.slice(0,7);
+    // If incoming is monthly, remove any daily entries in that month
+    if(isMonthly){days=days.filter(x=>x.date!==d.date&&x.date.slice(0,7)!==m)}
+    // If incoming is daily, check if a monthly entry exists for its month
+    var monthlyOverlap=!isMonthly&&days.some(x=>x.date===m);
+    if(!monthlyOverlap){
+      var e=days.find(x=>x.date===d.date);
+      if(e){e.royalties=Math.max(e.royalties||0,d.royalties||0);e.units=Math.max(e.units||0,d.units||0);e.pageReads=Math.max(e.pageReads||0,d.pageReads||0)}
+      else days.push({...d});
+    }
+    // If monthly, also remove any existing daily entries in that month
+    if(isMonthly){days=days.filter(x=>x.date.slice(0,7)!==m||x.date===d.date)}
+  });
   raw={books,dailyHistory:days,top30Books:a.top30Books||raw.top30Books||[],today:a.today,thisMonth:a.thisMonth,last30Days:a.last30Days,lastUpdated:new Date().toISOString()};
 }
 
