@@ -269,7 +269,9 @@ function renderHistory(period){
   document.getElementById('histStats').innerHTML=
     '<div class="stat"><div class="stat-lbl">'+(daysBack?'Today':'Latest')+'</div><div class="stat-val">'+(today?'$'+today.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(today?today.units+' units':'')+'</div></div>'+
     '<div class="stat"><div class="stat-lbl">'+(daysBack?'Yesterday':'Previous')+'</div><div class="stat-val">'+(yest?'$'+yest.royalties.toFixed(2):'$0.00')+'</div><div class="stat-sub">'+(yest?yest.units+' units':'')+'</div></div>'+
-    '<div class="stat"><div class="stat-lbl">'+lbl+'</div><div class="stat-val">$'+lR.toFixed(2)+'</div><div class="stat-sub">'+fmt(lU)+' units ~ '+fmt(lP)+' KENP</div></div>'+
+    '<div class="stat"><div class="stat-lbl">'+lbl+'</div><div class="stat-val">$'+lR.toFixed(2)+'</div><div class="stat-sub">'+fmt(lU)+' units</div></div>'+
+    '<div class="stat" style="background:#ebf8ff;border-color:#bee3f8"><div class="stat-lbl">+ KU est.</div><div class="stat-val">'+kenp$(lP)+'</div><div class="stat-sub">at ~$0.00335/page</div></div>'+
+    '<div class="stat" style="background:#e0f2fe;border-color:#93c5fd"><div class="stat-lbl">Total (incl. KU)</div><div class="stat-val">$'+(lR+lP*0.00335).toFixed(2)+'</div><div class="stat-sub">'+fmt(lU)+' units ~ '+fmt(lP)+' KENP</div></div>'+
     '<div class="stat"><div class="stat-lbl">KU Pages</div><div class="stat-val">'+fmt(lP)+'</div><div class="stat-sub">'+kenp$(lP)+'</div></div>'+
     '<div class="stat"><div class="stat-lbl">Avg/Unit</div><div class="stat-val">$'+(lU>0?(lR/lU).toFixed(2):'0.00')+'</div><div class="stat-sub">per sale</div></div>'+
     '<div class="stat"><div class="stat-lbl">Entries</div><div class="stat-val">'+entries.length+'</div><div class="stat-sub">'+periodName+'</div></div>';
